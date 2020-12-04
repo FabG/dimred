@@ -15,9 +15,19 @@ Run:
 Finally, don't forget to set you `$PYTHONPATH` variable to the root of your projects if you want to run the tests.
 `export PYTHONPATH=/to/root/of/your/project`
 
+# Tests
+Run:
+`pytest`
+Don't forget to set your `$PYTHONPATH` to the root of your project
+
+If you also want to see the print output to stdout, run:
+`pytest --capture=tee-sys`
+
 # Examples
 
 
 # Resources
  - [scikit learn PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
  - [MIT open source pca packate](https://github.com/erdogant/pca)
+ - [iris dataset for Unit Test](https://archive.ics.uci.edu/ml/datasets/Iris)
+ - [mnist handwritten digits dataset for Unit Test](http://yann.lecun.com/exdb/mnist/) - We use for UnitTesting a modified version of MNIST dataset that contains 2000 labeled images of each digit 0 and 1. Images are 28x28 pixels
