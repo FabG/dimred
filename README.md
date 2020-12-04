@@ -12,6 +12,9 @@ And you should set up a virtual environment with `conda` or `virtualenv`
 Run:
 `pip install -r requirements`
 
+Finally, don't forget to set you `$PYTHONPATH` variable to the root of your projects if you want to run the tests.
+`export PYTHONPATH=/to/root/of/your/project`
+
 # Examples
 
 
