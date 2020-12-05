@@ -7,14 +7,14 @@ DimRed is a python package to perform Dimension Reduction using PCA by default a
 from sklearn.decomposition import PCA
 import scipy.sparse as sp
 
-class dimred():
+class DimRed():
     """
     DimRed module
     """
 
     def __init__(self, algo='pca', n_components=None):
         """
-        Initialize dimred with user-defined parameters, defaulting to PCA algorithm
+        Initialize DimRed with user-defined parameters, defaulting to PCA algorithm
 
         Parameters
         ----------
@@ -42,30 +42,33 @@ class dimred():
         X : array-like of shape (n_samples, n_features)
             Training data, where n_samples is the number of samples
             and n_features is the number of features.
+
         Returns
         -------
         self : object
             Returns the instance itself.
         """
-        model, explained_variance_ratio = self._fit(X)
-        return (model, explained_variance_ratio)
+        model = self._fit(X)
+        return (model)
 
     def _fit(self, X):
-        """Dispatch to the right submethod depending on the chosen solver."""
+        """
+        Dispatch to the right submethod depending on the chosen solver
+            and apply the dimensionality reduction on X
+        """
 
         # Raise an error for sparse input.
         # This is more informative than the generic one raised by check_array.
         if sp.issparse(X):
-            raise TypeError('PCA does not support sparse input. See '
-                            'TruncatedSVD for a possible alternative.')
+            raise TypeError('PCA does not support sparse input. See TruncatedSVD for a possible alternative.')
 
         if self.algo == 'pca':
-            pca = PCA(n_components=2)
+            model_pca = PCA(n_components=self.n_components)
+            model_pca.fit(X)
+            self.n_components_ = model_pca.n_components_
+            self.explained_variance_ratio_ = model_pca.explained_variance_ratio_
+            self.singular_values_ = model_pca.singular_values_
+            self.percent_explained_variance = model_pca.explained_variance_ratio_.cumsum()
 
-            model = PCA(n_components=self.n_components)
-            model.fit(X)
-            explained_variance_ratio = model.explained_variance_ratio_
-            percent_explained_variance = explained_variance_ratio.cumsum()
 
-
-        return(model, explained_variance_ratio)
+        return(self)

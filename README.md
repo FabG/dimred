@@ -1,9 +1,12 @@
 # DimRed - Dimension Reduction Package
 
-This python package aims at offering Dimension Reduction capabilities leveraging algorithms such as Principal Component Analysis (PCA) and others.
-The core of PCA is built on scikitlearn functionality.
-Besides PCA, this package will be extended to offer additional capabilities such as SVD (TruncatedSVD) and SparsePCA.
-Ultimately, this package will also offer some "auto-ml" like capabilities picking the best approach based on your data.
+This python package aims at offering Dimension Reduction capabilities leveraging algorithms such as Principal Component Analysis (PCA) and others such as SVD (TruncatedSVD) and SparsePCA.
+
+This package implements the below existing sklearn packages, and automatically picks the most appropriate based on the data:
+ - `sklearn.decomposition.PCA` - if input is not sparse. More info at [link](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
+ - `sklearn.decomposition.TruncatedSVD` - if input is sparse. More info at [link](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html#sklearn.decomposition.TruncatedSVD)
+ - ...
+ 
 
 # Installation
 You need to run Python 3.X.

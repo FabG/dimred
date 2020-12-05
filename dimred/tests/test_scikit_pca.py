@@ -1,7 +1,10 @@
 import numpy as np
+from numpy import count_nonzero
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from scipy.sparse import issparse
+from scipy.sparse import csr_matrix, isspmatrix
 
 def test_np_array():
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
@@ -19,6 +22,48 @@ def test_np_array():
 
     assert(singular_values[0] == 6.300612319734663)
     assert(singular_values[1] == 0.5498039617971033)
+
+
+def test_np_array_sparse_noncsr():
+    # create sparse matrix
+    X_sparse = np.array([[1,0,0,0,0,0], [0,0,2,0,0,0], [0,0,0,2,0,0]])
+
+    # calculate sparsity
+    sparsity = 1.0 - count_nonzero(X_sparse) / X_sparse.size
+    # The above array has 0.833 sparsity (meaning 83.3% of its values are 0)
+    print('\n[test_np_array_sparse_noncsr] - Checking no exception for sparsity of: {}'.format(sparsity))
+
+    pca = PCA(n_components=1)
+    try:
+        pca.fit(X_sparse)
+        assert True
+        explained_variance_ratio = pca.explained_variance_ratio_
+        singular_values = pca.singular_values_
+
+        print('\n[test_np_array] - Explained Variance ratio: {}'.format(explained_variance_ratio))
+        print('[test_np_array] - Singular Values: {}'.format(singular_values))
+
+        assert(explained_variance_ratio[0] == 0.6666666666666667)
+        assert(singular_values[0] == 2.0000000000000004)
+    except TypeError:
+        assert False
+
+def test_np_array_sparse_csr():
+    # create sparse matrix
+    X_sparse = csr_matrix((3, 4))
+    X_sparse_array = csr_matrix((3, 4), dtype=np.int8).toarray()
+    # calculate sparsity
+    sparsity = 1.0 - count_nonzero(X_sparse_array) / X_sparse_array.size
+    # The above array has 1.0 sparsity (meaning 100% of its values are 0)
+    print('\n[test_np_array_sparse_csr] - Checking compressed sparse exception for sparsity of: {}'.format(sparsity))
+
+    pca = PCA(n_components=2)
+    try:
+        pca.fit(X_sparse)
+        assert False
+    except TypeError:
+        assert True
+
 
 def test_mnist_data():
     # loading modified mnist dataset
