@@ -1,5 +1,6 @@
 sklearn
 numpy
+pandas
 matplotlib
 scipy
 colourmap
