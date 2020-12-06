@@ -4,3 +4,4 @@ matplotlib
 scipy
 colourmap
 pytest
+pytest-cov

@@ -6,7 +6,7 @@ This package implements the below existing sklearn packages, and automatically p
  - `sklearn.decomposition.PCA` - if input is not sparse. More info at [link](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
  - `sklearn.decomposition.TruncatedSVD` - if input is sparse. More info at [link](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html#sklearn.decomposition.TruncatedSVD)
  - ...
- 
+
 
 # Installation
 You need to run Python 3.X.
@@ -19,12 +19,18 @@ Finally, don't forget to set you `$PYTHONPATH` variable to the root of your proj
 `export PYTHONPATH=/to/root/of/your/project`
 
 # Tests
-Run:
+For Unit Tests, run:
 `pytest`
 Don't forget to set your `$PYTHONPATH` to the root of your project
 
 If you also want to see the print output to stdout, run:
 `pytest --capture=tee-sys`
+
+For Unit Tests Coverage, run:
+`pytest --cov=dimred tests/`
+
+We should aime at having a minimum of 80% code coverage, and preferably closer or equal to 100%.
+
 
 # Examples
 

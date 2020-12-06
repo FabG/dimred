@@ -1,10 +1,16 @@
+import os
 import numpy as np
 from numpy import count_nonzero
 import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from scipy.sparse import issparse
 from scipy.sparse import csr_matrix, isspmatrix
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+#MY_DATA_PATH = os.path.join(THIS_DIR, os.pardir, 'data/data.csv')
+MY_DATA_PATH_MNIST = os.path.join(THIS_DIR, 'data/mnist_only_0_1.csv')
+MY_DATA_PATH_IRIS = os.path.join(THIS_DIR, 'data/iris_data.csv')
+print('MY_DATA_PATH_MNIST = {}'.format(MY_DATA_PATH_MNIST))
 
 def test_np_array():
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
@@ -73,7 +79,7 @@ def test_mnist_data():
     # Samples total: 4000
     # Dimensionality: 784 (28 x 28 pixels images)
     # Features: integers calues from 0 to 255 (Pixel Grey color)
-    mnist_df = pd.read_csv("data/mnist_only_0_1.csv")
+    mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)
     #print('MNIST Dataset sample: {}'.format(mnist_df.head()))
 
     pixel_colnames = mnist_df.columns[:-1]
