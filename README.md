@@ -15,7 +15,7 @@ This package implements the below existing sklearn packages, and automatically p
  - ...
 
 
-# Installation
+### Installation
 You need to run Python 3.X.
 And you should set up a virtual environment with `conda` or `virtualenv`
 
@@ -30,7 +30,7 @@ Finally, don't forget to set you `$PYTHONPATH` variable to the root of your proj
 ```
 It should map to: `/your/path/dimred/dimred`
 
-# Tests
+### Tests
 For Unit Tests, run:  
 `> pytest`
 Don't forget to set your `$PYTHONPATH` to the root of your project
@@ -44,31 +44,38 @@ For Unit Tests Coverage, run:
 We should aime at having a minimum of 80% code coverage, and preferably closer or equal to 100%.
 
 
-# Examples
+### Examples
 
 
-# Notebooks
+### Notebooks
  - [PCA implementation with EVD and SVD](notebooks/pca_evd_svd.ipynb) => provides implementation of PCA with EVD and SVD and shows SVD is a better implementation
 
 
-# More information about the algorithm and their parameters
+### More information about the algorithm and their parameters
 
-## PCA
+#### PCA
 When using `PCA` (Principal Component Analysis), you are using a Linear Dimension reduction algorithm, that will project your data to a lower dimensional space. It is a technique for `feature extraction` by combining input variables in a specific way so that the output "new" variables (or components) are all `independant of one another`. This is a benefit because of the assumptions of a linear model.
 
 Notes: PCA is an analysis approach. You can do PCA using SVD, or you can do PCA doing the eigen-decomposition, or you can do PCA using many other methods.  In fact, most implementations of PCA actually use performs SVD under the hood rather than doing eigen decomposition on the covariance matrix because SVD can be much more efficient and is able to handle sparse matrices. In addition, there are reduced forms of SVD which are even more economic to compute.
 
 From a high-level view PCA using the eigen-decomposition has three main steps:
-(1) Compute the covariance matrix of the data
-(2) Compute the eigen values and vectors of this covariance matrix
-(3) Use the eigen values and vectors to select only the most important feature vectors and then transform your data onto those vectors for reduced dimensionality!
-
-### Principal Components
+- (1) Compute the covariance matrix of the data
+- (2) Compute the eigen values and vectors of this covariance matrix
+- (3) Use the eigen values and vectors to select only the most important feature vectors and then transform your data onto those vectors for reduced dimensionality!
 
 
-# Resources
+
+### Resources
+#### Articles
  - [scikit learn PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
  - [MIT open source pca packate](https://github.com/erdogant/pca)
- - [iris dataset for Unit Test](https://archive.ics.uci.edu/ml/datasets/Iris)
- - [mnist handwritten digits dataset for Unit Test](http://yann.lecun.com/exdb/mnist/) - We use for UnitTesting a modified version of MNIST dataset that contains 2000 labeled images of each digit 0 and 1. Images are 28x28 pixels
  - [pca and svd explained with numpy](https://towardsdatascience.com/pca-and-svd-explained-with-numpy-5d13b0d2a4d8)
+ - [Mathematical explanation of PCA and SVD](https://math.stackexchange.com/questions/3869/what-is-the-intuitive-relationship-between-svd-and-pca)
+ - [Mathematical explanation - how to use SVD to perform PCA](https://stats.stackexchange.com/questions/134282/relationship-between-svd-and-pca-how-to-use-svd-to-perform-pca)
+ - [Tutorial on Principal Component Analysis - White paper](https://arxiv.org/pdf/1404.1100.pdf)
+ - [implement PCA using SVD with sklearn and numpy](https://stackoverflow.com/questions/60508233/python-implement-a-pca-using-svd)
+
+#### DataSets (for Unit Test)
+They are available under: `/tests/data`
+- [iris dataset for Unit Test](https://archive.ics.uci.edu/ml/datasets/Iris)
+- [mnist handwritten digits dataset for Unit Test](http://yann.lecun.com/exdb/mnist/)
