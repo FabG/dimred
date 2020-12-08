@@ -81,7 +81,7 @@ class DimRed():
             and eigenvalues sorted from high to low
         """
         X_cov = _cov(X)
-        e_vecs, e_vals = _eigen_sorted(X_cov)
+        e_vals, e_vecs = _eigen_sorted(X_cov)
 
         return X.dot(e_vecs), e_vals
 
@@ -110,4 +110,4 @@ class DimRed():
         # Sort the eigenvalue and eigenvector from high to low
         idx = eig_vals.argsort()[::-1]
 
-        return eig_vals[idx], eig_vals[:, idx]
+        return eig_vals[idx], eig_vecs[:, idx]

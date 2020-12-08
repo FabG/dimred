@@ -121,7 +121,6 @@ def test_mnist_data():
     assert(mnist_dimensions_after_pca == 48)
 
 
-
 def test_covariance():
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
@@ -132,3 +131,20 @@ def test_covariance():
 
     print('\n[test_covariance] - Checking Covariance Matrix of _cov(X)')
     assert(np.array_equal(X_cov, X_cov_ref))
+
+
+def test_eigen():
+    X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
+
+    X_eig_vecs_ref = np.array([[-0.83234965, -0.50163583, -0.23570226],
+                            [-0.45180545,  0.86041634, -0.23570226],
+                            [-0.32103877,  0.08969513,  0.94280904]])
+    X_eig_vals_ref = np.array([ 3.19755880e+00,  4.69107871e-01, -3.13055232e-18])
+
+    X_eig_vals, X_eig_vecs = DimRed._eigen_sorted(X_cov_ref)
+
+    print('\n[test_eigen] - Checking Eigen Sorted _eigen_sorted(X_cov)')
+    #assert(np.array_equal(X_eig_vals, X_eig_vals_ref))
+    #assert(np.array_equal(X_eig_vecs, X_eig_vecs_ref))
+    assert(np.allclose(X_eig_vals, X_eig_vals_ref))  # avoiding rounding float errors
+    assert(np.allclose(X_eig_vecs, X_eig_vecs_ref))  # avoiding rounding float errors
