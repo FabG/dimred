@@ -1,21 +1,43 @@
 # DimRed - Dimension Reduction Package
 
-This python package aims at offering Dimension Reduction capabilities leveraging algorithms such as Principal Component Analysis (PCA) and others such as SVD (TruncatedSVD) and SparsePCA.
-Its goal is to reduce the number of features whilst keeping most of the original information.
 
-Why is Dimension Reduction useful?
+### 1. DimRed Introduction
+**DimRed** is a python package that enables **Dimension Reduction** and visualization.
+
+#### What is Dimension Reduction?
+**Dimensiona reduction** (or Dimensionality reduction) refers to techniques for reducing the number of input variables in training data.
+
+*When dealing with high dimensional data, it is often useful to reduce the dimensionality by projecting the data to a lower dimensional subspace which captures the “essence” of the data. This is called **dimensionality reduction**.*
+
+— Page 11, [Machine Learning: A Probabilistic Perspective](https://www.amazon.com/Machine-Learning-Probabilistic-Perspective-Computation/dp/0262018020/ref=as_li_ss_tl?keywords=Machine+Learning:+A+Probabilistic+Perspective&qid=1580679017&sr=8-1&linkCode=sl1&tag=inspiredalgor-20&linkId=e1ce409a189df7eeb214b15424a7379c&language=en_US), 2012.
+
+
+High-dimensionality might mean hundreds, thousands, or even millions of input variables.
+
+Fewer input dimensions often means correspondingly fewer parameters or a simpler structure in the machine learning model, referred to as degrees of freedom. A model with too many degrees of freedom is likely to **overfit** the training dataset and may not perform well on new data.
+
+It is **desirable to have simple models that generalize well**, and in turn, input data with few input variables. This is particularly true for linear models where the number of inputs and the degrees of freedom of the model are often closely related.
+
+
+
+#### Why is Dimension Reduction useful?
 - Reduces training time — due to smaller dataset
 - Removes noise — by keeping only what’s relevant
 - Makes visualization possible — in cases where you have a maximum of 3 principal components
 
+#### How is DimRed implemented and what capabilities does it offer?
+DimRed python package aims at offering Dimension Reduction capabilities leveraging algorithms such as:
+ - **PCA** (Principal Component Analysis)
+ - **SVD** (Singular Value Decomponsition)
+ - **EVD** (Eigen Values Decompoisition)
+ - **TruncatedSVD**
+ - **SparsePCA**
+ It currently only supports **PCA** but the above algorithms will be added.
 
-This package implements the below existing sklearn packages, and automatically picks the most appropriate based on the data:
- - `sklearn.decomposition.PCA` - if input is not sparse. More info at [link](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
- - `sklearn.decomposition.TruncatedSVD` - if input is sparse. More info at [link](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html#sklearn.decomposition.TruncatedSVD)
- - ...
+See [section 5](#Link_dimred_algorithms) below for more information about each algorithm
 
-
-### Installation
+### 2. DimRed Installation
+#### 2.1 Install
 You need to run Python 3.X.
 And you should set up a virtual environment with `conda` or `virtualenv`
 
@@ -30,7 +52,7 @@ Finally, don't forget to set you `$PYTHONPATH` variable to the root of your proj
 ```
 It should map to: `/your/path/dimred/dimred`
 
-### Tests
+#### 2.2 Tests
 For Unit Tests, run:  
 `> pytest`
 Don't forget to set your `$PYTHONPATH` to the root of your project
@@ -41,19 +63,55 @@ If you also want to see the print output to stdout, run:
 For Unit Tests Coverage, run:  
 `> pytest --cov=dimred tests/`
 
-We should aime at having a minimum of 80% code coverage, and preferably closer or equal to 100%.
+Or:  
+`> pytest --capture=tee-sys --cov=dimred tests/`  
+
+We should aim at having a minimum of 80% code coverage, and preferably closer or equal to 100%.
 
 
-### Examples
+### 3. DimRed Examples
 
 
-### Notebooks
+### 4. Dimension Reduction Notebooks
  - [PCA implementation with EVD and SVD](notebooks/pca_evd_svd.ipynb) => provides implementation of PCA with EVD and SVD and shows SVD is a better implementation
  - [PCA vs LDA and PCA visualization on Iris data](notebooks/pca_lda_iris.ipynb)
 
-### More information about the algorithms and their parameters
+### 5. Dimension Reduction - Additional info
+#Link_dimred_algorithms
+#### 5.1 Dimensionality Reduction Algorithms
+
+There are many algorithms that can be used for dimensionality reduction.
+
+Two main classes of methods are those drawn from linear algebra and those drawn from manifold learning:
+
+##### => Linear Algebra Methods
+Matrix factorization methods drawn from the field of linear algebra can be used for dimensionality.
+Some of the more popular methods include:
+- [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis#:~:text=Principal%20component%20analysis%20(PCA)%20is,components%20and%20ignoring%20the%20rest.): Principal Components Analysis => process of computing the principal components and using them to perform a change of basis on the data, sometimes using only the first few principal components and ignoring the rest.
+- [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition): Singular Value Decomposition
+- [NMF](https://en.wikipedia.org/wiki/Non-negative_matrix_factorization): Non-Negative Matrix Factorization
+
+For more on matrix factorization, see this [tutorial](https://machinelearningmastery.com/introduction-to-matrix-decompositions-for-machine-learning/)
 
 
+
+##### => Manifold Learning Methods
+Manifold learning methods seek a lower-dimensional projection of high dimensional input that captures the salient properties of the input data.
+
+Some of the more popular methods include:
+- [Isomap](https://en.wikipedia.org/wiki/Isomap) Embedding
+- [LLE](https://en.wikipedia.org/wiki/Nonlinear_dimensionality_reduction#Locally-linear_embedding): Locally Linear Embedding
+- [MDS](https://en.wikipedia.org/wiki/Multidimensional_scaling): Multidimensional Scaling
+- [Spectral Embedding](https://en.wikipedia.org/wiki/Spectral_clustering)
+- [t-SNE](https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding): t-distributed Stochastic Neighbor Embedding
+
+Each algorithm offers a different approach to the challenge of discovering natural relationships in data at lower dimensions.
+
+There is no best dimensionality reduction algorithm, and no easy way to find the best algorithm for your data without using controlled experiments.
+
+
+
+#### 5.2 DimRed Package - Supported Algorithms
 #### EVD and SVD
 ###### SVD - Singular Value Decomposition
 
@@ -137,7 +195,7 @@ To contrast with LDA, **PCA** is a general approach for **denoising and dimensio
 
 
 
-### Resources
+### 6. Resources
 #### Articles
  - [scikit learn PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
  - [MIT open source pca packate](https://github.com/erdogant/pca)
@@ -148,8 +206,11 @@ To contrast with LDA, **PCA** is a general approach for **denoising and dimensio
  - [implement PCA using SVD with sklearn and numpy](https://stackoverflow.com/questions/60508233/python-implement-a-pca-using-svd)
  - [EVD and SVD white paper](https://www.cc.gatech.edu/~dellaert/pubs/svd-note.pdf)
  - [Difference between EVD and SVD](https://math.stackexchange.com/questions/320220/intuitively-what-is-the-difference-between-eigendecomposition-and-singular-valu)
+ - [Dimension reduction algorithms in python](https://machinelearningmastery.com/dimensionality-reduction-algorithms-with-python/)
 
-#### DataSets (for Unit Test)
-They are available under: `/tests/data`
-- [iris dataset for Unit Test](https://archive.ics.uci.edu/ml/datasets/Iris)
-- [mnist handwritten digits dataset for Unit Test](http://yann.lecun.com/exdb/mnist/)
+#### DataSets (for Unit Tests)
+We are using various datasets:
+ - some created statically in the unit test functions
+ - some loaded from scikitlearn: `from sklearn import datasets
+`- some available as flat files under: `/tests/data`
+  - [mnist handwritten digits dataset for Unit Test](http://yann.lecun.com/exdb/mnist/)

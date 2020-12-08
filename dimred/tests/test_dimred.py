@@ -5,6 +5,7 @@ import pandas as pd
 from dimred import DimRed
 from sklearn.preprocessing import StandardScaler
 from scipy.sparse import csr_matrix, isspmatrix
+from sklearn import datasets
 
 # Set up absolute path to unit test files
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -64,6 +65,30 @@ def test_np_array_sparse_csr():
         assert False
     except TypeError:
         assert True
+
+
+def test_iris_data():
+    iris = datasets.load_iris()
+
+    X = iris.data
+    y = iris.target
+
+    dimred = DimRed(n_components=2)
+    X_pca = dimred.fit(X)
+    #X_pca = dimred.fit(X).transform(X)
+    #X_pca2 = dimred.fit_transform(X)
+
+    explained_variance_ratio = dimred.explained_variance_ratio_
+    singular_values = dimred.singular_values_
+
+    print('\n[test_iris_data] - Explained Variance ratio: {}'.format(explained_variance_ratio))
+    print('[test_iris_data] - Singular Values: {}'.format(singular_values))
+
+    assert(explained_variance_ratio[0] == 0.9246187232017271)
+    assert(explained_variance_ratio[1] == 0.05306648311706782)
+    assert(singular_values[0] == 25.099960442183864)
+    assert(singular_values[1] == 6.013147382308733)
+    #assert(X_pca.all() == X_pca2.all())
 
 def test_mnist_data():
     # loading modified mnist dataset
