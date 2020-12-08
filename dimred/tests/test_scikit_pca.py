@@ -93,6 +93,31 @@ def test_iris_data():
     assert(singular_values[1] == 6.013147382308733)
 
 
+def test_iris_data_transform():
+    iris = datasets.load_iris()
+
+    X = iris.data
+    y = iris.target
+
+    pca = PCA(n_components=2)
+    X_pca = pca.fit(X).transform(X)
+    X_pca2 = pca.fit_transform(X)
+
+    explained_variance_ratio = pca.explained_variance_ratio_
+    singular_values = pca.singular_values_
+
+    print('\n[test_iris_data_transform] - Explained Variance ratio: {}'.format(explained_variance_ratio))
+    print('[test_iris_data_transform] - Singular Values: {}'.format(singular_values))
+
+    assert(explained_variance_ratio[0] == 0.9246187232017271)
+    assert(explained_variance_ratio[1] == 0.05306648311706782)
+    assert(singular_values[0] == 25.099960442183864)
+    assert(singular_values[1] == 6.013147382308733)
+
+    #assert(np.array_equal(X_pca, X_pca2))
+    assert(np.allclose(X_pca, X_pca2))  # avoiding rounding float errors
+
+
 def test_mnist_data():
     # loading modified mnist dataset
     # It contains 2000 labeled images of each digit 0 and 1. Images are 28x28 pixels

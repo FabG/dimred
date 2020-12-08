@@ -75,8 +75,6 @@ def test_iris_data():
 
     dimred = DimRed(n_components=2)
     X_pca = dimred.fit(X)
-    #X_pca = dimred.fit(X).transform(X)
-    #X_pca2 = dimred.fit_transform(X)
 
     explained_variance_ratio = dimred.explained_variance_ratio_
     singular_values = dimred.singular_values_
@@ -88,7 +86,6 @@ def test_iris_data():
     assert(explained_variance_ratio[1] == 0.05306648311706782)
     assert(singular_values[0] == 25.099960442183864)
     assert(singular_values[1] == 6.013147382308733)
-    #assert(X_pca.all() == X_pca2.all())
 
 def test_mnist_data():
     # loading modified mnist dataset
@@ -122,3 +119,16 @@ def test_mnist_data():
 
     assert(mnist_dimensions_before_pca == 784)
     assert(mnist_dimensions_after_pca == 48)
+
+
+
+def test_covariance():
+    X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
+    X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
+    X_cov = DimRed._cov(X)
+    print(X)
+    print(X_cov_ref)
+    print(X_cov)
+
+    print('\n[test_covariance] - Checking Covariance Matrix of _cov(X)')
+    assert(np.array_equal(X_cov, X_cov_ref))

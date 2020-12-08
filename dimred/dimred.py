@@ -4,8 +4,10 @@ dimred.py
 DimRed is a python package to perform Dimension Reduction using PCA by default and other algorithms.
 
 """
-from sklearn.decomposition import PCA
+import numpy as np
 import scipy.sparse as sp
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 class DimRed():
     """
@@ -70,5 +72,42 @@ class DimRed():
             self.singular_values_ = model_pca.singular_values_
             self.percent_explained_variance = model_pca.explained_variance_ratio_.cumsum()
 
-
         return(self)
+
+
+    def pca_evd(X):
+        """
+        Compute EVD based PCA and return Principal Components
+            and eigenvalues sorted from high to low
+        """
+        X_cov = _cov(X)
+        e_vecs, e_vals = _eigen_sorted(X_cov)
+
+        return X.dot(e_vecs), e_vals
+
+
+    def _cov(X):
+        """
+        Compute a Covariance matrix
+        """
+        n, p = X.shape
+        x_mean_vec = np.mean(X, axis=0)
+        X_centered = X - x_mean_vec
+        X_cov = X_centered.T.dot(X_centered) / (n-1)
+
+        return X_cov
+
+
+    def _eigen_sorted(X_cov):
+        """
+        Compute the eigen values and vectors using numpy
+            and return the eigenvalue and eigenvectors
+            sorted based on eigenvalue from high to low
+        """
+        # Compute the eigen values and vectors using numpy
+        eig_vals, eig_vecs = np.linalg.eig(X_cov)
+
+        # Sort the eigenvalue and eigenvector from high to low
+        idx = eig_vals.argsort()[::-1]
+
+        return eig_vals[idx], eig_vals[:, idx]
