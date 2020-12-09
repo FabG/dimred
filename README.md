@@ -42,29 +42,37 @@ You need to run Python 3.X.
 And you should set up a virtual environment with `conda` or `virtualenv`
 
 Run:
-```
+```bash
 > pip install -r requirements
 ```
 
 Finally, don't forget to set you `$PYTHONPATH` variable to the root of your projects if you want to run the tests.
-```
+```bash
 > export PYTHONPATH=/to/root/of/your/project
 ```
 It should map to: `/your/path/dimred/dimred`
 
 #### 2.2 Tests
 For Unit Tests, run:  
-`> pytest`
+```bash
+> pytest
+```
 Don't forget to set your `$PYTHONPATH` to the root of your project
 
 If you also want to see the print output to stdout, run:  
-`> pytest --capture=tee-sys`
+```bash
+> pytest --capture=tee-sys
+```
 
 For Unit Tests Coverage, run:  
-`> pytest --cov=dimred tests/`
+```bash
+> pytest --cov=dimred tests/
+```
 
 Or:  
-`> pytest --capture=tee-sys --cov=dimred tests/`  
+```bash
+> pytest --capture=tee-sys --cov=dimred tests/
+```
 
 We should aim at having a minimum of 80% code coverage, and preferably closer or equal to 100%.
 
@@ -112,6 +120,66 @@ There is no best dimensionality reduction algorithm, and no easy way to find the
 
 
 #### 5.2 DimRed Package - Supported Algorithms
+
+#### PCA
+When using `PCA` (Principal Component Analysis), you are using a Linear Dimension reduction algorithm, that will project your data to a lower dimensional space. It is an **unsupervised** technique for `feature extraction` by combining input variables in a specific way so that the output "new" variables (or components) are all `independant of one another`. This is a benefit because of the assumptions of a linear model.
+
+PCA aims to find linearly uncorrelated orthogonal axes, which are also known as principal components (PCs) in the m dimensional space to project the data points onto those PCs. The first PC captures the largest variance in the data. Let’s intuitively understand PCA by fitting it on a 2-D data matrix, which can be conveniently represented by a 2-D scatter plot:
+<p align="center" width="100%">
+    <img width="70%" src="images/pca_animation.gif">
+    <br><i>Making sense of PCA by fitting on a 2-D dataset<a href="https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues/140579#140579"> (source)</a></i>
+</p>
+
+Since all the PCs (Principal Components) are orthogonal to each other, we can use a pair of perpendicular lines in the 2-D space as the two PCs. To make the first PC capture the largest variance, we rotate our pair of PCs to make one of them optimally align with the spread of the data points. Next, all the data points can be projected onto the PCs, and their projections (red dots on PC1) are essentially the resultant dimensionality-reduced representation of the dataset. Viola, we just reduced the matrix from 2-D to 1-D while retaining the largest variance!
+
+The PCs can be determined via eigen decomposition of the covariance matrix C. After all, the geometrical meaning of eigen decomposition is to find a new coordinate system of the eigenvectors for C through rotations.
+Image for post
+Eigendecomposition of the covariance matrix C:  
+<p align="center" width="100%">
+    <img width="40%" src="images/eidgen_decomposition_covariance.png">
+</p>
+
+In the equation above, the covariance matrix C(m×m) is decomposed to a matrix of eigenvectors W(m×m) and a diagonal matrix of m eigenvalues Λ. The eigenvectors, which are the column vectors in W, are in fact the PCs we are seeking. We can then use matrix multiplication to project the data onto the PC space. For the purpose of dimensionality reduction, we can project the data points onto the first k PCs as the representation of the data:  
+<p align="center" width="100%">
+    <img width="30%" src="images/projected_data.png">
+</p>
+
+Notes: PCA is an analysis approach. You can do PCA using SVD, or you can do PCA doing the eigen-decomposition, or you can do PCA using many other methods.  In fact, most implementations of PCA actually use performs SVD under the hood rather than doing eigen decomposition on the covariance matrix because SVD can be much more efficient and is able to handle sparse matrices. In addition, there are reduced forms of SVD which are even more economic to compute.
+
+From a high-level view PCA using EVD (eigen-decomposition) has three main steps:
+- (1) Compute the covariance matrix of the data
+- (2) Compute the eigen values and vectors of this covariance matrix
+- (3) Use the eigen values and vectors to select only the most important feature vectors and then transform your data onto those vectors for reduced dimensionality!
+
+PCA can be very easily implemented with numpy as the key function performing eigen decomposition `np.linalg.eig` is already built-in:
+```python
+def pca(X):
+  # Data matrix X, assumes 0-centered
+  n, m = X.shape
+  assert np.allclose(X.mean(axis=0), np.zeros(m))
+  # Compute covariance matrix
+  C = np.dot(X.T, X) / (n-1)
+  # Eigen decomposition
+  eigen_vals, eigen_vecs = np.linalg.eig(C)
+  # Project X onto PC space
+  X_pca = np.dot(X, eigen_vecs)
+  return X_pca
+```
+
+
+#### LDA
+Both LDA and PCA are linear transformation techniques: LDA is a supervised whereas PCA is unsupervised – PCA ignores class labels.
+
+**LDA** is very useful to find dimensions which aim at **separating cluster**, thus you will have to know clusters before. LDA is not necessarily a classifier, but can be used as one. Thus LDA can only be used in **supervised learning**
+
+=> *LDA is used to carve up multidimensional space.*LDA is for classification, it almost always outperforms Logistic Regression when modeling small data with well separated clusters. It also handles multi-class data and class imbalances.
+
+
+To contrast with LDA, **PCA** is a general approach for **denoising and dimensionality reduction** and does not require any further information such as class labels in supervised learning. Therefore it can be used in **unsupervised learning**.
+
+=> *PCA is used to collapse multidimensional space*. PCA allows the collapsing of hundreds of spatial dimensions into a handful of lower spatial dimensions while preserving 70% - 90% of the important information. 3D objects cast 2D shadows. We can see the shape of an object from it's shadow. But we can't know everything about the shape from a single shadow. By having a small collection of shadows from different (globally optimal) angles, then we can know most things about the shape of an object. PCA helps reduce the 'Curse of Dimensionality' when modeling.
+
+
 #### EVD and SVD
 ###### SVD - Singular Value Decomposition
 
@@ -129,11 +197,64 @@ Note that the conditions above are mathematically the following constraints:
 
 The [fundamental theorem of linear algebra](https://en.wikipedia.org/wiki/Fundamental_theorem_of_linear_algebra) says that such a decomposition always exists.
 
+SVD is another decomposition method for both real and complex matrices. It decomposes a matrix into the product of two unitary matrices (U, V*) and a rectangular diagonal matrix of singular values (Σ):
+
+
+Here is a friendler  way to visualize the **SVD** formula:
+<p align="center" width="100%">
+    <img width="40%" src="images/svd_matrix.png">
+    <br><i>Illustration of SVD<a href="https://towardsdatascience.com/pca-and-svd-explained-with-numpy-5d13b0d2a4d8"> (source)</a></i>
+</p>
+
+In most cases, we work with real matrix X, and the resultant unitary matrices U and V will also be real matrices. Hence, the conjugate transpose of the U is simply the regular transpose.
+
 What **SVD** it used for?
 
 [Wikipedia has a nice list](https://en.wikipedia.org/wiki/Singular-value_decomposition#Applications_of_the_SVD), but I'll list a couple.
 - One of the most common applications is obtaining a low-rank approximation to a matrix (see **PCA**), which is used for compression, speed-up, and also actual data analysis.
 - The other one is for characterizing the pseudo-inverse for analysis or proofs, since inverting it automatically gives a formula that's the inverse when the matrix is invertible, and the pseudo-inverse when it is not.
+
+
+SVD has also already been implemented in numpy as `np.linalg.svd`. To use SVD to transform your data:
+
+```python
+def svd(X):
+  # Data matrix X, X doesn't need to be 0-centered
+  n, m = X.shape
+  # Compute full SVD
+  U, Sigma, Vh = np.linalg.svd(X,
+      full_matrices=False, # It's not necessary to compute the full matrix of U or V
+      compute_uv=True)
+  # Transform X with SVD components
+  X_svd = np.dot(U, np.diag(Sigma))
+  return X_svd
+```
+
+###### Relationship between PCA and SVD
+PCA and SVD are closely related approaches and can be both applied to decompose any rectangular matrices. We can look into their relationship by performing SVD on the covariance matrix C:
+<p align="center" width="100%">
+    <img width="40%" src="images/covariance_matrix_pca_svd.png">
+</p>
+
+From the above derivation, we notice that the result is in the same form with eigen decomposition of C, we can easily see the relationship between singular values (Σ) and eigenvalues (Λ):
+<p align="center" width="100%">
+    <img width="40%" src="images/eigen_singular_values_relationship.png">
+</p>
+
+
+To confirm that with numpy:
+```python
+# Compute covariance matrix
+C = np.dot(X.T, X) / (n-1)
+# Eigen decomposition
+eigen_vals, eigen_vecs = np.linalg.eig(C)
+# SVD
+U, Sigma, Vh = np.linalg.svd(X,
+    full_matrices=False,
+    compute_uv=True)
+# Relationship between singular values and eigen values:
+print(np.allclose(np.square(Sigma) / (n - 1), eigen_vals)) # True
+```
 
 
 ###### EVD - Eigenvalue (spectral) decomposition
@@ -167,39 +288,14 @@ Consider the eigendecomposition `𝐴=𝑃𝐷𝑃−1` and SVD `𝐴=𝑈Σ𝑉
 - In the SVD the entries in the diagonal matrix Σ are all real and nonnegative. In the eigendecomposition, the entries of 𝐷 can be any complex number - negative, positive, imaginary, whatever.
 - The SVD always exists for any sort of rectangular or square matrix, whereas the eigendecomposition can only exists for square matrices, and even among square matrices sometimes it doesn't exist.
 
-
-
-#### PCA
-When using `PCA` (Principal Component Analysis), you are using a Linear Dimension reduction algorithm, that will project your data to a lower dimensional space. It is an **unsupervised** technique for `feature extraction` by combining input variables in a specific way so that the output "new" variables (or components) are all `independant of one another`. This is a benefit because of the assumptions of a linear model.
-
-Notes: PCA is an analysis approach. You can do PCA using SVD, or you can do PCA doing the eigen-decomposition, or you can do PCA using many other methods.  In fact, most implementations of PCA actually use performs SVD under the hood rather than doing eigen decomposition on the covariance matrix because SVD can be much more efficient and is able to handle sparse matrices. In addition, there are reduced forms of SVD which are even more economic to compute.
-
-From a high-level view PCA using the eigen-decomposition has three main steps:
-- (1) Compute the covariance matrix of the data
-- (2) Compute the eigen values and vectors of this covariance matrix
-- (3) Use the eigen values and vectors to select only the most important feature vectors and then transform your data onto those vectors for reduced dimensionality!
-
-
-
-#### LDA
-Both LDA and PCA are linear transformation techniques: LDA is a supervised whereas PCA is unsupervised – PCA ignores class labels.
-
-**LDA** is very useful to find dimensions which aim at **separating cluster**, thus you will have to know clusters before. LDA is not necessarily a classifier, but can be used as one. Thus LDA can only be used in **supervised learning**
-
-=> *LDA is used to carve up multidimensional space.*LDA is for classification, it almost always outperforms Logistic Regression when modeling small data with well separated clusters. It also handles multi-class data and class imbalances.
-
-
-To contrast with LDA, **PCA** is a general approach for **denoising and dimensionality reduction** and does not require any further information such as class labels in supervised learning. Therefore it can be used in **unsupervised learning**.
-
-=> *PCA is used to collapse multidimensional space*. PCA allows the collapsing of hundreds of spatial dimensions into a handful of lower spatial dimensions while preserving 70% - 90% of the important information. 3D objects cast 2D shadows. We can see the shape of an object from it's shadow. But we can't know everything about the shape from a single shadow. By having a small collection of shadows from different (globally optimal) angles, then we can know most things about the shape of an object. PCA helps reduce the 'Curse of Dimensionality' when modeling.
-
+using the SVD to perform PCA makes much better sense numerically than forming the covariance matrix (in EVD) to begin with, since the formation of 𝐗𝐗⊤ can cause loss of precision
 
 
 ### 6. Resources
 #### Articles
  - [scikit learn PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
  - [MIT open source pca packate](https://github.com/erdogant/pca)
- - [pca and svd explained with numpy](https://towardsdatascience.com/pca-and-svd-explained-with-numpy-5d13b0d2a4d8)
+ - [PCA and SVD explained with numpy](https://towardsdatascience.com/pca-and-svd-explained-with-numpy-5d13b0d2a4d8)
  - [Mathematical explanation of PCA and SVD](https://math.stackexchange.com/questions/3869/what-is-the-intuitive-relationship-between-svd-and-pca)
  - [Mathematical explanation - how to use SVD to perform PCA](https://stats.stackexchange.com/questions/134282/relationship-between-svd-and-pca-how-to-use-svd-to-perform-pca)
  - [Tutorial on Principal Component Analysis - White paper](https://arxiv.org/pdf/1404.1100.pdf)
@@ -207,6 +303,7 @@ To contrast with LDA, **PCA** is a general approach for **denoising and dimensio
  - [EVD and SVD white paper](https://www.cc.gatech.edu/~dellaert/pubs/svd-note.pdf)
  - [Difference between EVD and SVD](https://math.stackexchange.com/questions/320220/intuitively-what-is-the-difference-between-eigendecomposition-and-singular-valu)
  - [Dimension reduction algorithms in python](https://machinelearningmastery.com/dimensionality-reduction-algorithms-with-python/)
+ - [PCA explained on wine data with chart animation](https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues/140579#140579)
 
 #### DataSets (for Unit Tests)
 We are using various datasets:

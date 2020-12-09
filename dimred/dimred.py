@@ -20,7 +20,13 @@ class DimRed():
 
         Parameters
         ----------
-        algo": Algorithm - default is 'pca' (Principal Component analysis)
+        algo: Algorithm used to perform Principal Component analysis
+            Values:
+                "pca_evd" - use Eigen Value Decomposition
+                    (1) Compute the covariance matrix of the data
+                    (2) Compute the eigen values and vectors of this covariance matrix
+                    (3) Use the eigen values and vectors to select only the most important feature vectors and then transform your data onto those vectors for reduced dimensionality!
+                "pca_svd" - 
             More algorithms will be added to this package over time such as TruncatedSVD.
         n_components : Number of components to keep.
             Missing Value => All components are kept.
