@@ -8,13 +8,14 @@ import numpy as np
 import scipy.sparse as sp
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.utils.extmath import svd_flip, stable_cumsum
 
 class DimRed():
     """
-    DimRed module
+    Linear dimensionality reduction class
     """
 
-    def __init__(self, algo='pca', n_components=None):
+    def __init__(self, algo='pca_svd', n_components=None):
         """
         Initialize DimRed with user-defined parameters, defaulting to PCA algorithm
 
@@ -22,11 +23,12 @@ class DimRed():
         ----------
         algo: Algorithm used to perform Principal Component analysis
             Values:
+                "pca_svd" (default) - use Singular Value Decomposition
                 "pca_evd" - use Eigen Value Decomposition
                     (1) Compute the covariance matrix of the data
                     (2) Compute the eigen values and vectors of this covariance matrix
                     (3) Use the eigen values and vectors to select only the most important feature vectors and then transform your data onto those vectors for reduced dimensionality!
-                "pca_svd" - 
+
             More algorithms will be added to this package over time such as TruncatedSVD.
         n_components : Number of components to keep.
             Missing Value => All components are kept.
@@ -43,7 +45,7 @@ class DimRed():
 
     def fit(self, X):
         """
-        Fit PCA on data
+        Fit the model with X
 
         Parameters
         ----------
@@ -70,7 +72,7 @@ class DimRed():
         if sp.issparse(X):
             raise TypeError('PCA does not support sparse input. See TruncatedSVD for a possible alternative.')
 
-        if self.algo == 'pca':
+        if self.algo == 'pca_sklearn':
             model_pca = PCA(n_components=self.n_components)
             model_pca.fit(X)
             self.n_components_ = model_pca.n_components_
@@ -78,7 +80,58 @@ class DimRed():
             self.singular_values_ = model_pca.singular_values_
             self.percent_explained_variance = model_pca.explained_variance_ratio_.cumsum()
 
+        if self.algo == 'pca_svd':
+            return self._fit_pca_svd(X, self.n_components)
+
+
         return(self)
+
+
+    def _fit_pca_svd(self, X, n_components):
+        """
+        Compute SVD based PCA and return Principal Components
+        """
+        # Center X
+        X_centered = DimRed._center(X)
+
+        # SVD => X = U x Sigma x Vt
+        U, Sigma, Vt = np.linalg.svd(X_centered, full_matrices=False)
+
+        # flip eigenvectors' sign to enforce deterministic output
+        U, Vt = svd_flip(U, Vt)
+
+        components_ = Vt
+
+        # Get variance explained by singular values
+        n_samples, n_features = X.shape        
+        explained_variance_ = (Sigma ** 2) / (n_samples - 1)
+
+        total_var = explained_variance_.sum()
+        explained_variance_ratio_ = explained_variance_ / total_var
+        singular_values_ = Sigma.copy()  # Store the singular values.
+
+        # Postprocess the number of components required
+        if 0 < n_components < 1.0:
+            ratio_cumsum = stable_cumsum(explained_variance_ratio_)
+            n_components = np.searchsorted(ratio_cumsum, n_components,
+                                           side='right') + 1
+
+        # Compute noise covariance using Probabilistic PCA model
+        if n_components < min(n_features, n_samples):
+            self.noise_variance_ = explained_variance_[n_components:].mean()
+        else:
+            self.noise_variance_ = 0.
+
+        self.n_samples_, self.n_features_ = n_samples, n_features
+        self.components_ = components_[:n_components]
+        self.n_components_ = n_components
+        self.explained_variance_ = explained_variance_[:n_components]
+        self.explained_variance_ratio_ = \
+            explained_variance_ratio_[:n_components]
+        self.singular_values_ = singular_values_[:n_components]
+
+        return U, Sigma, Vt
+
 
 
     def pca_evd(X):
@@ -92,14 +145,25 @@ class DimRed():
         return X.dot(e_vecs), e_vals
 
 
+    def _center(X):
+        """
+        Center a matrix
+        """
+        n_samples, n_features = X.shape
+        x_mean_vec = np.mean(X, axis=0)
+        X_centered = X - x_mean_vec
+
+        return X_centered
+
+
     def _cov(X):
         """
         Compute a Covariance matrix
         """
-        n, p = X.shape
+        n_samples, n_features = X.shape
         x_mean_vec = np.mean(X, axis=0)
         X_centered = X - x_mean_vec
-        X_cov = X_centered.T.dot(X_centered) / (n-1)
+        X_cov = X_centered.T.dot(X_centered) / (n_samples - 1)
 
         return X_cov
 

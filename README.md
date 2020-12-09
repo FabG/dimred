@@ -5,7 +5,7 @@
 **DimRed** is a python package that enables **Dimension Reduction** and visualization.
 
 #### What is Dimension Reduction?
-**Dimensiona reduction** (or Dimensionality reduction) refers to techniques for reducing the number of input variables in training data.
+**Dimension reduction** (or Dimensionality reduction) refers to techniques for reducing the number of input variables in training data.
 
 *When dealing with high dimensional data, it is often useful to reduce the dimensionality by projecting the data to a lower dimensional subspace which captures the “essence” of the data. This is called **dimensionality reduction**.*
 
@@ -26,15 +26,13 @@ It is **desirable to have simple models that generalize well**, and in turn, inp
 - Makes visualization possible — in cases where you have a maximum of 3 principal components
 
 #### How is DimRed implemented and what capabilities does it offer?
-DimRed python package aims at offering Dimension Reduction capabilities leveraging algorithms such as:
+DimRed is offered as a native python package (and soon part of MLaaS as a service). Under the hood, it leverages `numpy` and `scikit-learn` to implement and expose:
  - **PCA** (Principal Component Analysis)
  - **SVD** (Singular Value Decomponsition)
  - **EVD** (Eigen Values Decompoisition)
- - **TruncatedSVD**
- - **SparsePCA**
- It currently only supports **PCA** but the above algorithms will be added.
 
-See [section 5](#Link_dimred_algorithms) below for more information about each algorithm
+
+See section 5(Dimension Reduction - Additional info) below for more information about each algorithm
 
 ### 2. DimRed Installation
 #### 2.1 Install
@@ -85,7 +83,7 @@ We should aim at having a minimum of 80% code coverage, and preferably closer or
  - [PCA vs LDA and PCA visualization on Iris data](notebooks/pca_lda_iris.ipynb)
 
 ### 5. Dimension Reduction - Additional info
-#Link_dimred_algorithms
+
 #### 5.1 Dimensionality Reduction Algorithms
 
 There are many algorithms that can be used for dimensionality reduction.
@@ -181,7 +179,7 @@ To contrast with LDA, **PCA** is a general approach for **denoising and dimensio
 
 
 #### EVD and SVD
-###### SVD - Singular Value Decomposition
+##### SVD - Singular Value Decomposition
 
 The **SVD** allows to describe the effect of a matrix 𝐴 on a vector (via the matrix-vector product), as a three-step process `𝐴=𝑈Σ𝑉†`:
 - 1. A first rotation in the input space (`𝑉`)
@@ -230,7 +228,7 @@ def svd(X):
   return X_svd
 ```
 
-###### Relationship between PCA and SVD
+##### Relationship between PCA and SVD
 PCA and SVD are closely related approaches and can be both applied to decompose any rectangular matrices. We can look into their relationship by performing SVD on the covariance matrix C:
 <p align="center" width="100%">
     <img width="40%" src="images/covariance_matrix_pca_svd.png">
@@ -256,8 +254,11 @@ U, Sigma, Vh = np.linalg.svd(X,
 print(np.allclose(np.square(Sigma) / (n - 1), eigen_vals)) # True
 ```
 
+So what does this imply?  
+It suggests that we can actually perform PCA using SVD, or vice versa. In fact, **most implementations of PCA actually use performs SVD under the hood** rather than doing eigen decomposition on the covariance matrix because SVD can be much more efficient and is able to handle sparse matrices. In addition, there are reduced forms of SVD which are even more economic to compute.
 
-###### EVD - Eigenvalue (spectral) decomposition
+
+##### EVD - Eigenvalue (spectral) decomposition
 Similarly, for the **eigendecomposition** (also known as eigenvalue decomposition, spectral decomposition, or diagonalization):
 
 An eigendecomposition describes the effect of a matrix 𝐴 on a vector as a different 3-step process `𝐴=𝑄Λ𝑄−1`:

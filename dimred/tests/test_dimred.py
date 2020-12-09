@@ -101,8 +101,6 @@ def test_mnist_data():
     pixel_colnames = mnist_df.columns[:-1]
     X = mnist_df[pixel_colnames]
     y = mnist_df['label']
-    #print('X Dataset sample: {}'.format(X.head()))
-    #print('y Dataset sample: {}'.format(y.head()))
 
     # PCA is sensitive to the scale of the features.
     # We can standardize your data onto unit scale (mean = 0 and variance = 1) by using Scikit-Learn's StandardScaler.
@@ -120,16 +118,23 @@ def test_mnist_data():
     assert(mnist_dimensions_before_pca == 784)
     assert(mnist_dimensions_after_pca == 48)
 
+def test_center():
+    X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
+    X_center_ref = np.array([[-1.33333333, 0., -0.33333333],[-0.33333333, -1., -0.33333333],[1.66666667, 1., 0.66666667]])
+    X_center = DimRed._center(X)
+    print(X)
+
+    print('\n[test_center] - Checking Matrix Center: _center(X)')
+    assert(np.allclose(X_center, X_center_ref))
+
 
 def test_covariance():
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
     X_cov = DimRed._cov(X)
     print(X)
-    print(X_cov_ref)
-    print(X_cov)
 
-    print('\n[test_covariance] - Checking Covariance Matrix of _cov(X)')
+    print('\n[test_covariance] - Checking Matrix Covariance: _cov(X)')
     assert(np.array_equal(X_cov, X_cov_ref))
 
 
@@ -144,7 +149,5 @@ def test_eigen():
     X_eig_vals, X_eig_vecs = DimRed._eigen_sorted(X_cov_ref)
 
     print('\n[test_eigen] - Checking Eigen Sorted _eigen_sorted(X_cov)')
-    #assert(np.array_equal(X_eig_vals, X_eig_vals_ref))
-    #assert(np.array_equal(X_eig_vecs, X_eig_vecs_ref))
     assert(np.allclose(X_eig_vals, X_eig_vals_ref))  # avoiding rounding float errors
     assert(np.allclose(X_eig_vecs, X_eig_vecs_ref))  # avoiding rounding float errors
