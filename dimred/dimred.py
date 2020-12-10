@@ -6,8 +6,6 @@ DimRed is a python package to perform Dimension Reduction using PCA by default a
 """
 import numpy as np
 import scipy.sparse as sp
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 
 class DimRed():
@@ -15,7 +13,7 @@ class DimRed():
     Linear dimensionality reduction class
     """
 
-    def __init__(self, algo='pca_svd', n_components=None):
+    def __init__(self, algo='pca_svd', n_components=0.95):
         """
         Initialize DimRed with user-defined parameters, defaulting to PCA algorithm
 
@@ -72,22 +70,17 @@ class DimRed():
         if sp.issparse(X):
             raise TypeError('PCA does not support sparse input. See TruncatedSVD for a possible alternative.')
 
-        if self.algo == 'pca_sklearn':
-            model_pca = PCA(n_components=self.n_components)
-            model_pca.fit(X)
-            self.n_components_ = model_pca.n_components_
-            self.explained_variance_ratio_ = model_pca.explained_variance_ratio_
-            self.singular_values_ = model_pca.singular_values_
-            self.percent_explained_variance = model_pca.explained_variance_ratio_.cumsum()
-
         if self.algo == 'pca_svd':
-            return self._fit_pca_svd(X, self.n_components)
+            return self._fit_pca_svd(X)
+
+        if self.algo == 'pca_evd':
+            return self._fit_pca_evd(X)
 
 
         return(self)
 
 
-    def _fit_pca_svd(self, X, n_components):
+    def _fit_pca_svd(self, X):
         """
         Compute SVD based PCA and return Principal Components
         using scipy.linalg.svd and lapack_driver 'gesvd'
@@ -113,6 +106,7 @@ class DimRed():
         singular_values_ = Sigma.copy()  # Store the singular values.
 
         # Postprocess the number of components required
+        n_components = self.n_components
         if 0 < n_components < 1.0:
             ratio_cumsum = stable_cumsum(explained_variance_ratio_)
             n_components = np.searchsorted(ratio_cumsum, n_components,
@@ -136,7 +130,7 @@ class DimRed():
 
 
 
-    def pca_evd(X):
+    def _fit_pca_evd(self, X):
         """
         Compute EVD based PCA and return Principal Components
             and eigenvalues sorted from high to low

@@ -15,7 +15,7 @@ MY_DATA_PATH_IRIS = os.path.join(THIS_DIR, 'data/iris_data.csv')
 print('MY_DATA_PATH_MNIST = {}'.format(MY_DATA_PATH_MNIST))
 
 
-def test_np_array():
+def test_np_array_2_components():
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
     dimred = DimRed(n_components=2)
     model = dimred.fit(X)
@@ -25,6 +25,20 @@ def test_np_array():
 
     assert(explained_variance_ratio[0] == 0.9924428900898052)
     assert(explained_variance_ratio[1] == 0.007557109910194766)
+
+def test_np_array_default_components():
+    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+    dimred = DimRed()  #0.95 default
+    dimred2 = DimRed(n_components=0.95)  #0.95 default
+    model = dimred.fit(X)
+    model2 = dimred.fit(X)
+    explained_variance_ratio = dimred.explained_variance_ratio_
+    explained_variance_ratio2 = dimred.explained_variance_ratio_
+
+    print('\n[test_np_array] - Explained Variance ratio: {}'.format(explained_variance_ratio))
+
+    assert(explained_variance_ratio[0] == 0.9924428900898052)
+    assert(explained_variance_ratio2[0] == 0.9924428900898052)
 
 def test_np_array_sparse_noncsr():
     # create sparse matrix
@@ -160,6 +174,8 @@ def test_pca_evd():
                         [-5.90946462,  2.38523353,  3.06412939]])
     e_vals_ref = np.array([ 3.19755880e+00,  4.69107871e-01, -3.13055232e-18])
 
+    dimred = DimRed()  #0.95 default
+
     # Covariance (implemented by _cov())
     n_samples, n_features = X.shape
     x_mean_vec = np.mean(X, axis=0)
@@ -173,7 +189,7 @@ def test_pca_evd():
 
     X_vecs, e_vals = X.dot(e_vecs), e_vals
 
-    X_vecs_fct, e_vals_fct = DimRed.pca_evd(X)
+    X_vecs_fct, e_vals_fct = dimred._fit_pca_evd(X)
 
     print('\n[test_pca_evd] - Checking Eigen vectors and valuestest_pca_evd')
     assert(np.allclose(X_vecs, X_vec_ref))  # avoiding rounding float errors
