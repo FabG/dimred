@@ -138,7 +138,7 @@ def test_covariance():
     assert(np.array_equal(X_cov, X_cov_ref))
 
 
-def test_eigen():
+def test_eigen_sorted():
     X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
 
     X_eig_vecs_ref = np.array([[-0.83234965, -0.50163583, -0.23570226],
@@ -148,6 +148,35 @@ def test_eigen():
 
     X_eig_vals, X_eig_vecs = DimRed._eigen_sorted(X_cov_ref)
 
-    print('\n[test_eigen] - Checking Eigen Sorted _eigen_sorted(X_cov)')
+    print('\n[test_eigen_sorted] - Checking Eigen Sorted _eigen_sorted(X_cov)')
     assert(np.allclose(X_eig_vals, X_eig_vals_ref))  # avoiding rounding float errors
     assert(np.allclose(X_eig_vecs, X_eig_vecs_ref))  # avoiding rounding float errors
+
+
+def test_pca_evd():
+    X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
+    X_vec_ref = np.array([[-2.63957145,  2.94002954,  3.06412939],
+                        [-3.02011565,  1.57797737,  3.06412939],
+                        [-5.90946462,  2.38523353,  3.06412939]])
+    e_vals_ref = np.array([ 3.19755880e+00,  4.69107871e-01, -3.13055232e-18])
+
+    # Covariance (implemented by _cov())
+    n_samples, n_features = X.shape
+    x_mean_vec = np.mean(X, axis=0)
+    X_centered = X - x_mean_vec
+    X_cov = X_centered.T.dot(X_centered) / (n_samples - 1)
+
+    # Eigen values (implemented by _eigen_sorted)
+    eig_vals, eig_vecs = np.linalg.eig(X_cov)
+    idx = eig_vals.argsort()[::-1]
+    e_vals, e_vecs = eig_vals[idx], eig_vecs[:, idx]
+
+    X_vecs, e_vals = X.dot(e_vecs), e_vals
+
+    X_vecs_fct, e_vals_fct = DimRed.pca_evd(X)
+
+    print('\n[test_pca_evd] - Checking Eigen vectors and valuestest_pca_evd')
+    assert(np.allclose(X_vecs, X_vec_ref))  # avoiding rounding float errors
+    assert(np.allclose(X_vecs_fct, X_vec_ref))  # avoiding rounding float errors
+    assert(np.allclose(e_vals, e_vals_ref))  # avoiding rounding float errors
+    assert(np.allclose(e_vals_fct, e_vals_ref))  # avoiding rounding float errors

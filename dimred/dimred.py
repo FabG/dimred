@@ -90,11 +90,13 @@ class DimRed():
     def _fit_pca_svd(self, X, n_components):
         """
         Compute SVD based PCA and return Principal Components
+        using scipy.linalg.svd and lapack_driver 'gesvd'
         """
         # Center X
         X_centered = DimRed._center(X)
 
         # SVD => X = U x Sigma x Vt
+        # full_matricesbool = False => U and Vh are of shape (M, K) and (K, N), where K = min(M, N).
         U, Sigma, Vt = np.linalg.svd(X_centered, full_matrices=False)
 
         # flip eigenvectors' sign to enforce deterministic output
@@ -103,7 +105,7 @@ class DimRed():
         components_ = Vt
 
         # Get variance explained by singular values
-        n_samples, n_features = X.shape        
+        n_samples, n_features = X.shape
         explained_variance_ = (Sigma ** 2) / (n_samples - 1)
 
         total_var = explained_variance_.sum()
@@ -139,8 +141,8 @@ class DimRed():
         Compute EVD based PCA and return Principal Components
             and eigenvalues sorted from high to low
         """
-        X_cov = _cov(X)
-        e_vals, e_vecs = _eigen_sorted(X_cov)
+        X_cov = DimRed._cov(X)
+        e_vals, e_vecs = DimRed._eigen_sorted(X_cov)
 
         return X.dot(e_vecs), e_vals
 
