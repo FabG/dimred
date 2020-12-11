@@ -162,7 +162,7 @@ def test_eigen_sorted():
 
     X_eig_vals, X_eig_vecs = DimRed._eigen_sorted(X_cov_ref)
 
-    print('\n[test_eigen_sorted] - Checking Eigen Sorted _eigen_sorted(X_cov)')
+    print('\n[test_eigen_sorted] - Checking Eigen Sorted: _eigen_sorted(X_cov)')
     assert(np.allclose(X_eig_vals, X_eig_vals_ref))  # avoiding rounding float errors
     assert(np.allclose(X_eig_vecs, X_eig_vecs_ref))  # avoiding rounding float errors
 
@@ -191,7 +191,7 @@ def test_pca_evd():
 
     X_vecs_fct, e_vals_fct = dimred._fit_pca_evd(X)
 
-    print('\n[test_pca_evd] - Checking Eigen vectors and valuestest_pca_evd')
+    print('\n[test_pca_evd] - Checking Eigen vectors and values: _fit_pca_evd(X)')
     assert(np.allclose(X_vecs, X_vec_ref))  # avoiding rounding float errors
     assert(np.allclose(X_vecs_fct, X_vec_ref))  # avoiding rounding float errors
     assert(np.allclose(e_vals, e_vals_ref))  # avoiding rounding float errors

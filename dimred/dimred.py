@@ -13,7 +13,7 @@ class DimRed():
     Linear dimensionality reduction class
     """
 
-    def __init__(self, algo='pca_svd', n_components=0.95):
+    def __init__(self, algo='pca_svd_full', n_components=0.95):
         """
         Initialize DimRed with user-defined parameters, defaulting to PCA algorithm
 
@@ -65,10 +65,8 @@ class DimRed():
             and apply the dimensionality reduction on X
         """
 
-        # Raise an error for sparse input.
-        # This is more informative than the generic one raised by check_array.
-        if sp.issparse(X):
-            raise TypeError('PCA does not support sparse input. See TruncatedSVD for a possible alternative.')
+        if self.algo == 'pca_svd_full':
+            return self._fit_pca_svd_full(X)
 
         if self.algo == 'pca_svd':
             return self._fit_pca_svd(X)
@@ -80,11 +78,17 @@ class DimRed():
         return(self)
 
 
-    def _fit_pca_svd(self, X):
+    def _fit_pca_svd_full(self, X):
         """
         Compute SVD based PCA and return Principal Components
-        using scipy.linalg.svd and lapack_driver 'gesvd'
+        Principal component analysis using SVD: Singular Value Decomposition
+        X . V = U . S ==> X = U.S.Vt
+        Vt is the matrix that rotate the data from one basis to another
         """
+
+        # Pre-processing
+        X, n_samples, n_features = self._preprocess(X)
+
         # Center X
         X_centered = DimRed._center(X)
 
@@ -98,14 +102,70 @@ class DimRed():
         components_ = Vt
 
         # Get variance explained by singular values
-        n_samples, n_features = X.shape
         explained_variance_ = (Sigma ** 2) / (n_samples - 1)
 
+        # Postprocess the number of components required
+        X = self._postprocess(X, Sigma, components_, explained_variance_)
+
+        return U, Sigma, Vt
+
+
+    def _fit_pca_svd(self, X):
+        """
+        Compute SVD based PCA and return Principal Components
+        Principal component analysis using SVD: Singular Value Decomposition
+        X . V = U . S ==> X = U.S.Vt
+        Vt is the matrix that rotate the data from one basis to another
+        Note: SVD is a factorization of a real or complex matrix that generalizes
+         the eigendecomposition of a square normal matrix to any
+         mxn  matrix via an extension of the polar decomposition.
+
+        """
+        # Pre-processing
+        X, n_samples, n_features = self._preprocess(X)
+
+        # Center X
+        X_centered = DimRed._center(X)
+
+        # SVD
+        U, Sigma, Vt = np.linalg.svd(X_centered, full_matrices=False)
+
+        # flip eigenvectors' sign to enforce deterministic output
+        U, Vt = svd_flip(U, Vt)
+
+        # Get variance explained by singular values
+        explained_variance_ = (Sigma ** 2) / (n_samples - 1)
+
+        # Return principal components and eigenvalues to calculate the portion of sample variance explained
+        return U, Sigma, Vt
+
+
+
+    def _fit_pca_evd(self, X):
+        """
+        Compute EVD based PCA and return Principal Components
+            and eigenvalues sorted from high to low
+        """
+        # Center X and build Covariance Matrix
+        X_cov = DimRed._cov(X)
+
+        # EVD
+        E_vals, E_vecs = DimRed._eigen_sorted(X_cov)
+        U = np.dot(X, E_vecs)
+
+        # Return principal components and eigenvalues to calculate the portion of sample variance explained
+        return U, E_vals
+
+
+    def _postprocess(self, X, Sigma, components_, explained_variance_):
+        """
+        Postprocessing for PCA SVD
+        """
+        n_features, n_samples = X.shape
         total_var = explained_variance_.sum()
         explained_variance_ratio_ = explained_variance_ / total_var
         singular_values_ = Sigma.copy()  # Store the singular values.
 
-        # Postprocess the number of components required
         n_components = self.n_components
         if 0 < n_components < 1.0:
             ratio_cumsum = stable_cumsum(explained_variance_ratio_)
@@ -126,26 +186,30 @@ class DimRed():
             explained_variance_ratio_[:n_components]
         self.singular_values_ = singular_values_[:n_components]
 
-        return U, Sigma, Vt
+        return X
 
-
-
-    def _fit_pca_evd(self, X):
+    def _preprocess(self, X):
         """
-        Compute EVD based PCA and return Principal Components
-            and eigenvalues sorted from high to low
+        Preprocessing
         """
-        X_cov = DimRed._cov(X)
-        e_vals, e_vecs = DimRed._eigen_sorted(X_cov)
 
-        return X.dot(e_vecs), e_vals
+        # Raise an error for sparse input.
+        # This is more informative than the generic one raised by check_array.
+        if sp.issparse(X):
+            raise TypeError('PCA does not support sparse input. See TruncatedSVD for a possible alternative.')
+
+        if self.n_components is None:
+            self.n_components = X.shape[1] - 1
+
+        n_samples, n_features = X.shape
+
+        return(X, n_samples, n_features)
 
 
     def _center(X):
         """
         Center a matrix
         """
-        n_samples, n_features = X.shape
         x_mean_vec = np.mean(X, axis=0)
         X_centered = X - x_mean_vec
 
@@ -157,8 +221,7 @@ class DimRed():
         Compute a Covariance matrix
         """
         n_samples, n_features = X.shape
-        x_mean_vec = np.mean(X, axis=0)
-        X_centered = X - x_mean_vec
+        X_centered = DimRed._center(X)
         X_cov = X_centered.T.dot(X_centered) / (n_samples - 1)
 
         return X_cov
