@@ -91,6 +91,7 @@ class DimRed():
          mxn  matrix via an extension of the polar decomposition.
 
         """
+        n_samples, n_features = X_centered.shape
 
         # SVD
         # full_matricesbool = False => U and Vh are of shape (M, K) and (K, N), where K = min(M, N).
@@ -101,7 +102,7 @@ class DimRed():
         components_ = Vt
 
         # Get variance explained by singular values
-        explained_variance_ = (Sigma ** 2) / (self.n_samples_ - 1)
+        explained_variance_ = (Sigma ** 2) / (n_samples - 1)
 
         # Postprocess the number of components required
         X_centered = self._postprocess(X_centered, Sigma, components_, explained_variance_)
@@ -131,7 +132,7 @@ class DimRed():
         """
         Postprocessing for PCA SVD
         """
-        n_features, n_samples = self.n_features_, self.n_samples_
+        n_samples, n_features = X.shape
         total_var = explained_variance_.sum()
         explained_variance_ratio_ = explained_variance_ / total_var
         singular_values_ = Sigma.copy()  # Store the singular values.
@@ -169,8 +170,6 @@ class DimRed():
 
         if self.n_components is None:
             self.n_components = X.shape[1] - 1
-
-        self.n_samples_, self.n_features_ = X.shape
 
         # Center X
         X_centered = DimRed._center(X)

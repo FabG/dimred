@@ -5,6 +5,7 @@ import pandas as pd
 from dimred import DimRed
 from sklearn.preprocessing import StandardScaler
 from scipy.sparse import csr_matrix, isspmatrix
+from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn import datasets
 
 # Set up absolute path to unit test files
@@ -196,3 +197,40 @@ def test_pca_evd():
     assert(np.allclose(X_vecs_fct, X_vec_ref))  # avoiding rounding float errors
     assert(np.allclose(e_vals, e_vals_ref))  # avoiding rounding float errors
     assert(np.allclose(e_vals_fct, e_vals_ref))  # avoiding rounding float errors
+
+def test_pca_svd():
+    X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
+    U_ref = np.array([[-0.48117093, -0.65965234,  0.57735027],
+                            [-0.33069022,  0.74653242,  0.57735027],
+                            [ 0.81186114, -0.08688008,  0.57735027]])
+    Vt_ref = np.array([[ 0.83234965,  0.45180545,  0.32103877],
+                        [ 0.50163583, -0.86041634, -0.08969513],
+                        [-0.23570226, -0.23570226,  0.94280904]])
+    Sigma_ref = np.array([2.52885697e+00, 9.68615374e-01, 5.82986245e-16])
+
+    dimred = DimRed()  #0.95 default
+
+    # Center matrix
+    n_samples, n_features = X.shape
+    x_mean_vec = np.mean(X, axis=0)
+    X_centered = X - x_mean_vec
+
+    # SVD - manual
+    U, Sigma, Vt = np.linalg.svd(X_centered, full_matrices=False)
+    U, Vt = svd_flip(U, Vt)
+    components_ = Vt
+    explained_variance_ = (Sigma ** 2) / (n_samples - 1)
+
+    # post preprocessing
+    X_centered = dimred._postprocess(X_centered, Sigma, components_, explained_variance_)
+
+    # SVD - function
+    U2, Sigma2, Vt2 = dimred._pca_svd(X_centered)
+
+    print('\n[test_pca_svd] - Checking Eigen vectors and values: _fit_pca_svd(X)')
+    assert(np.allclose(U, U_ref))  # avoiding rounding float errors
+    assert(np.allclose(U2, U_ref))  # avoiding rounding float errors
+    assert(np.allclose(Vt, Vt_ref))  # avoiding rounding float errors
+    assert(np.allclose(Vt, Vt_ref))  # avoiding rounding float errors
+    assert(np.allclose(Sigma, Sigma_ref))  # avoiding rounding float errors
+    assert(np.allclose(Sigma2, Sigma_ref))  # avoiding rounding float errors
