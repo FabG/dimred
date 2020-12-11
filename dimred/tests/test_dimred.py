@@ -18,7 +18,7 @@ print('MY_DATA_PATH_MNIST = {}'.format(MY_DATA_PATH_MNIST))
 def test_np_array_2_components():
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
     dimred = DimRed(n_components=2)
-    model = dimred.fit(X)
+    model = dimred.fit_transform(X)
     explained_variance_ratio = dimred.explained_variance_ratio_
 
     print('\n[test_np_array] - Explained Variance ratio: {}'.format(explained_variance_ratio))
@@ -30,8 +30,8 @@ def test_np_array_default_components():
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
     dimred = DimRed()  #0.95 default
     dimred2 = DimRed(n_components=0.95)  #0.95 default
-    model = dimred.fit(X)
-    model2 = dimred.fit(X)
+    model = dimred.fit_transform(X)
+    model2 = dimred.fit_transform(X)
     explained_variance_ratio = dimred.explained_variance_ratio_
     explained_variance_ratio2 = dimred.explained_variance_ratio_
 
@@ -51,7 +51,7 @@ def test_np_array_sparse_noncsr():
 
     dimred = DimRed(n_components=1)
     try:
-        dimred.fit(X_sparse)
+        dimred.fit_transform(X_sparse)
         assert True
         explained_variance_ratio = dimred.explained_variance_ratio_
         singular_values = dimred.singular_values_
@@ -75,7 +75,7 @@ def test_np_array_sparse_csr():
 
     dimred = DimRed(n_components=2)
     try:
-        dimred.fit(X_sparse)
+        dimred.fit_transform(X_sparse)
         assert False
     except TypeError:
         assert True
@@ -88,7 +88,7 @@ def test_iris_data():
     y = iris.target
 
     dimred = DimRed(n_components=2)
-    X_pca = dimred.fit(X)
+    X_pca = dimred.fit_transform(X)
 
     explained_variance_ratio = dimred.explained_variance_ratio_
     singular_values = dimred.singular_values_
@@ -122,7 +122,7 @@ def test_mnist_data():
     scaler.fit(X)
 
     dimred = DimRed(n_components = .90) # n_components = .90 means that scikit-learn will choose the minimum number of principal components such that 90% of the variance is retained.
-    dimred.fit(X)
+    dimred.fit_transform(X)
 
     mnist_dimensions_before_pca = len(pixel_colnames)
     mnist_dimensions_after_pca = dimred.n_components_
@@ -189,7 +189,7 @@ def test_pca_evd():
 
     X_vecs, e_vals = X.dot(e_vecs), e_vals
 
-    X_vecs_fct, e_vals_fct = dimred._fit_pca_evd(X)
+    X_vecs_fct, e_vals_fct = dimred._pca_evd(X)
 
     print('\n[test_pca_evd] - Checking Eigen vectors and values: _fit_pca_evd(X)')
     assert(np.allclose(X_vecs, X_vec_ref))  # avoiding rounding float errors
