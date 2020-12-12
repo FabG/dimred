@@ -76,7 +76,6 @@ class DimRed():
         if self.algo == 'pca_evd':
             return self._pca_evd(X_centered)
 
-
         return(self)
 
 
@@ -128,11 +127,65 @@ class DimRed():
         return U, E_vals
 
 
+    def _center(X):
+        """
+        Center a matrix
+        """
+        x_mean_vec = np.mean(X, axis=0)
+        X_centered = X - x_mean_vec
+
+        return X_centered
+
+
+    def _cov(X):
+        """
+        Compute a Covariance matrix
+        """
+        n_samples, n_features = X.shape
+        X_centered = DimRed._center(X)
+        X_cov = X_centered.T.dot(X_centered) / (n_samples - 1)
+
+        return X_cov
+
+
+    def _preprocess(self, X):
+        """
+        Preprocessing
+        """
+
+        # Raise an error for sparse input.
+        # This is more informative than the generic one raised by check_array.
+        if sp.issparse(X):
+            raise TypeError('PCA does not support sparse input. See TruncatedSVD for a possible alternative.')
+
+        # Center X
+        return DimRed._center(X)
+
+
+    def _eigen_sorted(X_cov):
+        """
+        Compute the eigen values and vectors using numpy
+            and return the eigenvalue and eigenvectors
+            sorted based on eigenvalue from high to low
+        """
+        # Compute the eigen values and vectors using numpy
+        eig_vals, eig_vecs = np.linalg.eig(X_cov)
+
+        # Sort the eigenvalue and eigenvector from high to low
+        idx = eig_vals.argsort()[::-1]
+
+        return eig_vals[idx], eig_vecs[:, idx]
+
+
     def _postprocess(self, X, Sigma, components_, explained_variance_):
         """
         Postprocessing for PCA SVD
         """
         n_samples, n_features = X.shape
+
+        if self.n_components is None:
+            self.n_components = X.shape[1] - 1
+
         total_var = explained_variance_.sum()
         explained_variance_ratio_ = explained_variance_ / total_var
         singular_values_ = Sigma.copy()  # Store the singular values.
@@ -157,57 +210,3 @@ class DimRed():
         self.singular_values_ = singular_values_[:n_components]
 
         return X
-
-    def _preprocess(self, X):
-        """
-        Preprocessing
-        """
-
-        # Raise an error for sparse input.
-        # This is more informative than the generic one raised by check_array.
-        if sp.issparse(X):
-            raise TypeError('PCA does not support sparse input. See TruncatedSVD for a possible alternative.')
-
-        if self.n_components is None:
-            self.n_components = X.shape[1] - 1
-
-        # Center X
-        X_centered = DimRed._center(X)
-
-        return(X_centered)
-
-
-    def _center(X):
-        """
-        Center a matrix
-        """
-        x_mean_vec = np.mean(X, axis=0)
-        X_centered = X - x_mean_vec
-
-        return X_centered
-
-
-    def _cov(X):
-        """
-        Compute a Covariance matrix
-        """
-        n_samples, n_features = X.shape
-        X_centered = DimRed._center(X)
-        X_cov = X_centered.T.dot(X_centered) / (n_samples - 1)
-
-        return X_cov
-
-
-    def _eigen_sorted(X_cov):
-        """
-        Compute the eigen values and vectors using numpy
-            and return the eigenvalue and eigenvectors
-            sorted based on eigenvalue from high to low
-        """
-        # Compute the eigen values and vectors using numpy
-        eig_vals, eig_vecs = np.linalg.eig(X_cov)
-
-        # Sort the eigenvalue and eigenvector from high to low
-        idx = eig_vals.argsort()[::-1]
-
-        return eig_vals[idx], eig_vecs[:, idx]

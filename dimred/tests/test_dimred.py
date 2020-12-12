@@ -16,6 +16,18 @@ MY_DATA_PATH_IRIS = os.path.join(THIS_DIR, 'data/iris_data.csv')
 print('MY_DATA_PATH_MNIST = {}'.format(MY_DATA_PATH_MNIST))
 
 
+def test_init():
+    dimred = DimRed()
+    dimred2 = DimRed(algo='pca_svd')
+    dimred3 = DimRed(algo='pca_evd', n_components=3)
+    assert (dimred.n_components == 0.95)
+    assert (dimred.algo == 'pca_svd')
+    assert (dimred2.n_components == 0.95)
+    assert (dimred2.algo == 'pca_svd')
+    assert (dimred3.n_components == 3)
+    assert (dimred3.algo == 'pca_evd')
+
+
 def test_np_array_2_components():
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
     dimred = DimRed(n_components=2)
@@ -152,6 +164,15 @@ def test_covariance():
     print('\n[test_covariance] - Checking Matrix Covariance: _cov(X)')
     assert(np.array_equal(X_cov, X_cov_ref))
 
+
+def test_preprocess():
+    X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
+    X_center_ref = np.array([[-1.33333333, 0., -0.33333333],[-0.33333333, -1., -0.33333333],[1.66666667, 1., 0.66666667]])
+
+    dimred = DimRed()
+    X = dimred._preprocess(X)
+    print('\n[test_preprocess] - Checking Matrix Center amd n_components: _preprocess(X)')
+    assert(np.allclose(X, X_center_ref))
 
 def test_eigen_sorted():
     X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
