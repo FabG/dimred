@@ -7,6 +7,9 @@ from sklearn.preprocessing import StandardScaler
 from scipy.sparse import csr_matrix, isspmatrix
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn import datasets
+from sklearn.decomposition import TruncatedSVD
+from scipy.sparse import random as sparse_random
+
 
 # Set up absolute path to unit test files
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -76,22 +79,6 @@ def test_np_array_sparse_noncsr():
         assert(singular_values[0] == 2.0000000000000004)
     except TypeError:
         assert False
-
-def test_np_array_sparse_csr():
-    # create sparse matrix
-    X_sparse = csr_matrix((3, 4))
-    X_sparse_array = csr_matrix((3, 4), dtype=np.int8).toarray()
-    # calculate sparsity
-    sparsity = 1.0 - count_nonzero(X_sparse_array) / X_sparse_array.size
-    # The above array has 1.0 sparsity (meaning 100% of its values are 0)
-    print('\n[test_np_array_sparse_csr] - Checking compressed sparse exception for sparsity of: {}'.format(sparsity))
-
-    dimred = DimRed(n_components=2)
-    try:
-        dimred.fit_transform(X_sparse)
-        assert False
-    except TypeError:
-        assert True
 
 
 def test_iris_data():
@@ -170,9 +157,12 @@ def test_preprocess():
     X_center_ref = np.array([[-1.33333333, 0., -0.33333333],[-0.33333333, -1., -0.33333333],[1.66666667, 1., 0.66666667]])
 
     dimred = DimRed()
-    X = dimred._preprocess(X)
+    X, n_samples, n_features = dimred._preprocess(X)
     print('\n[test_preprocess] - Checking Matrix Center amd n_components: _preprocess(X)')
     assert(np.allclose(X, X_center_ref))
+    assert(n_samples == X.shape[0])
+    assert(n_features == X.shape[1])
+
 
 def test_eigen_sorted():
     X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
@@ -255,3 +245,20 @@ def test_pca_svd():
     assert(np.allclose(Vt, Vt_ref))  # avoiding rounding float errors
     assert(np.allclose(Sigma, Sigma_ref))  # avoiding rounding float errors
     assert(np.allclose(Sigma2, Sigma_ref))  # avoiding rounding float errors
+
+
+def test_truncated_svd():
+    X = sparse_random(100, 100, density=0.01, format='csr',
+                       random_state=42)
+    explained_variance_ratio_ref = np.array([0.0646051, 0.06339479, 0.06394407, 0.05352903, 0.04062679])
+    explained_variance_ratio_sum_ref = 0.2860997781448586
+    singular_values_ref = np.array([1.55360944, 1.5121377, 1.51052009, 1.37056529, 1.19917045])
+    svd = TruncatedSVD(n_components=5, n_iter=7, random_state=42)
+    svd.fit(X)
+
+    #dimred = DimRed()  #0.95 default
+    #X_pca = dimred.fit_transform(X)
+
+    assert(np.allclose(svd.explained_variance_ratio_, explained_variance_ratio_ref))  # avoiding rounding float errors
+    assert(svd.explained_variance_ratio_.sum() == explained_variance_ratio_sum_ref)
+    assert(np.allclose(svd.singular_values_, singular_values_ref))  # avoiding rounding float errors

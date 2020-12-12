@@ -7,13 +7,14 @@ DimRed is a python package to perform Dimension Reduction using PCA by default a
 import numpy as np
 import scipy.sparse as sp
 from sklearn.utils.extmath import svd_flip, stable_cumsum
+from sklearn.decomposition import PCA, SparsePCA, TruncatedSVD
 
 class DimRed():
     """
     Linear dimensionality reduction class
     """
 
-    def __init__(self, algo='pca_svd', n_components=0.95):
+    def __init__(self, algo='pca_svd', n_components=0.95, random_int=None):
         """
         Initialize DimRed with user-defined parameters, defaulting to PCA algorithm
 
@@ -34,11 +35,16 @@ class DimRed():
                 Ex: n_components = 3 => returns Top 3 principal components
             Values < 0 are the components that cover at least the percentage of variance.
                 Ex: n_components = 0.85 => returns all components that cover at least 85% of variance.
+         random : int optional
+                    Random state
+                    Pass an int for reproducible results across multiple function calls.
         """
 
         # Store in object
         self.n_components = n_components
         self.algo = algo
+        self.issparse = False
+        self.random_int = random_int
 
 
     def fit_transform(self, X):
@@ -67,9 +73,15 @@ class DimRed():
         """
 
         # Preprocessing
-        X_centered = self._preprocess(X)
+        X_centered, n_samples, n_features = self._preprocess(X)
+
+
 
         # Dispath to right PCA algorithm
+        if self.issparse:
+            print('[dimred]: X is sparse - using TruncatedSVD')
+            return self._pca_truncated_svd(X)
+
         if self.algo == 'pca_svd':
             return self._pca_svd(X_centered)
 
@@ -78,6 +90,21 @@ class DimRed():
 
         return(self)
 
+    def _pca_truncated_svd(self, X):
+        """
+        Use ScikitLearn TruncatedSVD
+        Dimensionality reduction using truncated SVD (aka LSA).
+        This transformer performs linear dimensionality reduction by means of
+        truncated singular value decomposition (SVD). Contrary to PCA, this
+        estimator does not center the data before computing the singular value
+        decomposition. This means it can work with sparse matrices
+        efficiently.
+        """
+
+        pca = TruncatedSVD(n_components=self.n_components, random_state=self.random_int)
+        X_transf = pca.fit_transform(X)
+
+        return(X_transf)
 
     def _pca_svd(self, X_centered):
         """
@@ -156,10 +183,12 @@ class DimRed():
         # Raise an error for sparse input.
         # This is more informative than the generic one raised by check_array.
         if sp.issparse(X):
-            raise TypeError('PCA does not support sparse input. See TruncatedSVD for a possible alternative.')
+            self.issparse = True
+
+        n_samples, n_features = X.shape
 
         # Center X
-        return DimRed._center(X)
+        return DimRed._center(X), n_samples, n_features
 
 
     def _eigen_sorted(X_cov):
