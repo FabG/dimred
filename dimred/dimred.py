@@ -188,7 +188,7 @@ class DimRed():
         # scipy.sparse defines a number of optimized sparse objects and issparse
         # determines if the insput is ot type scipy.sparse matrix object
         # To ntoe some matrixes can still be sparsed but not of that optimized object type
-        if sp.issparse(X): # compressed format
+        if sp.issparse(X): # compressed format of type scipy.sparse
             self.sp_issparse = True
             self.issparse = True
             self.sparsity = 1.0 - csr_matrix.getnnz(X) / (X.shape[0] * X.shape[1])
@@ -202,8 +202,16 @@ class DimRed():
         if self.issparse: print('[dimred]: X has a sparsity of: {}'.format(self.sparsity))
         else: print('[dimred]: X is not sparse')
 
-
         n_samples, n_features = X.shape
+        print('[dimred]: X has {} observations and {} features'.format(n_samples, n_features))
+
+        if n_features == 1:
+            raise ValueError("Number of features {} implies there is not dimensionality reduction that is possible".format(n_features))
+
+        if self.n_components > n_features:
+            print('[dimred]: Warning - Number of components {} cannot be higher than number of features {}'.format(self.n_components, n_features))
+            print('[dimred]: Warning - n_components will be set instead to: {}'.format(n_features - 1))
+            self.n_components = n_features - 1
 
         # Center X
         return DimRed._center(X), n_samples, n_features

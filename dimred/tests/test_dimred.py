@@ -173,6 +173,27 @@ def test_preprocess():
     assert(n_samples == X.shape[0])
     assert(n_features == X.shape[1])
 
+def test_preprocess_feature_is_one():
+    X = np.array([[-1], [2]])
+    dimred = DimRed()
+    print('\n[test_preprocess_feature_is_one] - check single feature matrix raise an error with {} features'.format(X.shape[1]))
+
+    try:
+        dimred.fit_transform(X)
+        assert False
+    except:
+        assert True
+
+def test_preprocess_components_high():
+    X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
+    HIGH_COMPONENTS = 5
+    assert(X.shape[1] < HIGH_COMPONENTS)
+    dimred = DimRed(n_components=HIGH_COMPONENTS)
+    print('\n[test_preprocess_components_high] - check if components higher than features and default value'.format(X.shape[1]))
+    dimred.fit_transform(X)
+    assert(dimred.n_components == X.shape[1] - 1)
+
+
 
 def test_eigen_sorted():
     X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
