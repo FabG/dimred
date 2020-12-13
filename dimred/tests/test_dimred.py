@@ -22,7 +22,7 @@ def test_init():
     dimred2 = DimRed(algo='pca_svd')
     dimred3 = DimRed(algo='pca_evd', n_components=3)
     assert (dimred.n_components == 0.95)
-    assert (dimred.algo == 'pca_svd')
+    assert (dimred.algo == 'pca')
     assert (dimred2.n_components == 0.95)
     assert (dimred2.algo == 'pca_svd')
     assert (dimred3.n_components == 3)
@@ -92,7 +92,7 @@ def test_np_array_sparse_csr():
     assert(dimred.sp_issparse)
 
 
-def test_iris_data():
+def test_iris_data_pca():
     iris = datasets.load_iris()
 
     X = iris.data
@@ -104,15 +104,34 @@ def test_iris_data():
     explained_variance_ratio = dimred.explained_variance_ratio_
     singular_values = dimred.singular_values_
 
-    print('\n[test_iris_data] - Explained Variance ratio: {}'.format(explained_variance_ratio))
-    print('[test_iris_data] - Singular Values: {}'.format(singular_values))
+    print('\n[test_iris_data_pca] - Explained Variance ratio: {}'.format(explained_variance_ratio))
+    print('[test_iris_data_pca] - Singular Values: {}'.format(singular_values))
+    assert(explained_variance_ratio[0] == 0.9246187232017271)
+    assert(explained_variance_ratio[1] == 0.05306648311706783)
+    assert(singular_values[0] == 25.099960442183864)
+    assert(singular_values[1] == 6.013147382308734)
+
+def test_iris_data_dimredsvd():
+    iris = datasets.load_iris()
+
+    X = iris.data
+    y = iris.target
+
+    dimred = DimRed(n_components=2, algo="dimred_svd")
+    X_pca = dimred.fit_transform(X)
+
+    explained_variance_ratio = dimred.explained_variance_ratio_
+    singular_values = dimred.singular_values_
+
+    print('\n[test_iris_data_dimredsvd] - Explained Variance ratio: {}'.format(explained_variance_ratio))
+    print('[test_iris_data_dimredsvd] - Singular Values: {}'.format(singular_values))
     assert(explained_variance_ratio[0] == 0.9246187232017271)
     assert(explained_variance_ratio[1] == 0.05306648311706782)
     assert(singular_values[0] == 25.099960442183864)
     assert(singular_values[1] == 6.013147382308733)
 
 
-def test_mnist_data():
+def test_mnist_data_pca():
     # loading modified mnist dataset
     # It contains 2000 labeled images of each digit 0 and 1. Images are 28x28 pixels
     # Classes: 2 (digits 0 and 1)
@@ -121,7 +140,6 @@ def test_mnist_data():
     # Dimensionality: 784 (28 x 28 pixels images)
     # Features: integers calues from 0 to 255 (Pixel Grey color)
     mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)
-    #print('MNIST Dataset sample: {}'.format(mnist_df.head()))
 
     pixel_colnames = mnist_df.columns[:-1]
     X = mnist_df[pixel_colnames]
@@ -133,6 +151,29 @@ def test_mnist_data():
     scaler.fit(X)
 
     dimred = DimRed(n_components = .90) # n_components = .90 means that scikit-learn will choose the minimum number of principal components such that 90% of the variance is retained.
+    dimred.fit_transform(X)
+
+    mnist_dimensions_before_pca = len(pixel_colnames)
+    mnist_dimensions_after_pca = dimred.n_components_
+    print('\n[test_mnist_data_pca] - Number of dimensions before PCA: ' + str(mnist_dimensions_before_pca))
+    print('[test_mnist_data_pca] - Number of dimensions after PCA: ' + str(mnist_dimensions_after_pca))
+    assert(mnist_dimensions_before_pca == 784)
+    assert(mnist_dimensions_after_pca == 48)
+
+
+def test_mnist_data_dimredsvd():
+    mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)
+
+    pixel_colnames = mnist_df.columns[:-1]
+    X = mnist_df[pixel_colnames]
+    y = mnist_df['label']
+
+    # PCA is sensitive to the scale of the features.
+    # We can standardize your data onto unit scale (mean = 0 and variance = 1) by using Scikit-Learn's StandardScaler.
+    scaler = StandardScaler()
+    scaler.fit(X)
+
+    dimred = DimRed(n_components = .90, algo="dimred_svd") # n_components = .90 means that scikit-learn will choose the minimum number of principal components such that 90% of the variance is retained.
     dimred.fit_transform(X)
 
     mnist_dimensions_before_pca = len(pixel_colnames)
@@ -210,7 +251,7 @@ def test_eigen_sorted():
     assert(np.allclose(X_eig_vecs, X_eig_vecs_ref))  # avoiding rounding float errors
 
 
-def test_pca_evd():
+def test_dimred_pca_evd():
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_vec_ref = np.array([[-2.63957145,  2.94002954,  3.06412939],
                         [-3.02011565,  1.57797737,  3.06412939],
@@ -232,7 +273,7 @@ def test_pca_evd():
 
     X_vecs, e_vals = X.dot(e_vecs), e_vals
 
-    X_vecs_fct, e_vals_fct = dimred._pca_evd(X)
+    X_vecs_fct, e_vals_fct = dimred._dimred_pca_evd(X)
 
     print('\n[test_pca_evd] - Checking Eigen vectors and values: _fit_pca_evd(X)')
     assert(np.allclose(X_vecs, X_vec_ref))  # avoiding rounding float errors
@@ -240,7 +281,7 @@ def test_pca_evd():
     assert(np.allclose(e_vals, e_vals_ref))  # avoiding rounding float errors
     assert(np.allclose(e_vals_fct, e_vals_ref))  # avoiding rounding float errors
 
-def test_pca_svd():
+def test_dimred_pca_svd():
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     U_ref = np.array([[-0.48117093, -0.65965234,  0.57735027],
                             [-0.33069022,  0.74653242,  0.57735027],
@@ -264,12 +305,12 @@ def test_pca_svd():
     explained_variance_ = (Sigma ** 2) / (n_samples - 1)
 
     # post preprocessing
-    X_centered = dimred._postprocess(X_centered, Sigma, components_, explained_variance_)
+    X_centered = dimred._postprocess_dimred_pcasvd(X_centered, Sigma, components_, explained_variance_)
 
     # SVD - function
-    U2, Sigma2, Vt2 = dimred._pca_svd(X_centered)
+    U2, Sigma2, Vt2 = dimred._dimred_pca_svd(X_centered)
 
-    print('\n[test_pca_svd] - Checking Eigen vectors and values: _fit_pca_svd(X)')
+    print('\n[test_dimred_pca_svd] - Checking Eigen vectors and values: _fit_pca_svd(X)')
     assert(np.allclose(U, U_ref))  # avoiding rounding float errors
     assert(np.allclose(U2, U_ref))  # avoiding rounding float errors
     assert(np.allclose(Vt, Vt_ref))  # avoiding rounding float errors

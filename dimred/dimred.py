@@ -19,7 +19,7 @@ class DimRed():
     Linear dimensionality reduction class
     """
 
-    def __init__(self, algo='pca_svd', n_components=N_COMPONENTS, random_int=None):
+    def __init__(self, algo='pca', n_components=N_COMPONENTS, random_int=None):
         """
         Initialize DimRed with user-defined parameters, defaulting to PCA algorithm
 
@@ -27,8 +27,10 @@ class DimRed():
         ----------
         algo: Algorithm used to perform Principal Component analysis
             Values:
-                "pca_svd" (default) - use Singular Value Decomposition
-                "pca_evd" - use Eigen Value Decomposition
+                "pca" (default) - use scikit learn decomposition.PCA() function based of SVD "as-is"
+                    as a pass-through. Results should be the same as if calling decomposiiton.PCA()
+                "dimred_svd" - use Singular Value Decomposition for PCA with numpy (internally built)
+                "dimred_evd" - use Eigen Value Decomposition for PCA with numpy (internally built)
                     (1) Compute the covariance matrix of the data
                     (2) Compute the eigen values and vectors of this covariance matrix
                     (3) Use the eigen values and vectors to select only the most important feature vectors and then transform your data onto those vectors for reduced dimensionality!
@@ -84,15 +86,22 @@ class DimRed():
         # Dispath to right PCA algorithm
         if self.sp_issparse:
             print('[dimred]: X is sparse - using TruncatedSVD')
-            return self._pca_truncated_svd(X)
+            X_dimred = self._pca_truncated_svd(X)
 
-        if self.algo == 'pca_svd':
-            return self._pca_svd(X_centered)
+        if self.algo == 'pca':
+            print('[dimred]: using sklearn PCA')
+            X_dimred = self._pca(X_centered)
 
-        if self.algo == 'pca_evd':
-            return self._pca_evd(X_centered)
+        if self.algo == 'dimred_svd':
+            print('[dimred]: using DimRed implementation of SVD for PCA')
+            X_dimred = self._dimred_pca_svd(X_centered)
 
-        return(self)
+        if self.algo == 'dimred_evd':
+            print('[dimred]: using DimRed implementation of EVD for PCA')
+            X_dimred = self._dimred_pca_evd(X_centered)
+
+        return(X_dimred)
+
 
     def _pca_truncated_svd(self, X):
         """
@@ -110,7 +119,31 @@ class DimRed():
 
         return(X_transf)
 
-    def _pca_svd(self, X_centered):
+    def _pca(self, X):
+        """
+        Use ScikitLearn PCA
+        Linear dimensionality reduction using Singular Value Decomposition of the
+        data to project it to a lower dimensional space. The input data is centered
+        but not scaled for each feature before applying the SVD.
+        It uses the LAPACK implementation of the full SVD or a randomized truncated
+        SVD by the method of Halko et al. 2009, depending on the shape of the input
+        data and the number of components to extract.
+        It can also use the scipy.sparse.linalg ARPACK implementation of the
+        truncated SVD.
+        Notice that this class does not support sparse input. See
+        `TruncatedSVD` for an alternative with sparse data.
+        """
+
+        pca = PCA(n_components=self.n_components, random_state=self.random_int)
+        X_transf = pca.fit_transform(X)
+
+        # Postprocessing
+        X_transf = self._postprocess_pca(X_transf, pca)
+
+        return(X_transf)
+
+
+    def _dimred_pca_svd(self, X_centered):
         """
         Compute SVD based PCA and return Principal Components
         Principal component analysis using SVD: Singular Value Decomposition
@@ -135,14 +168,14 @@ class DimRed():
         explained_variance_ = (Sigma ** 2) / (n_samples - 1)
 
         # Postprocess the number of components required
-        X_centered = self._postprocess(X_centered, Sigma, components_, explained_variance_)
+        X_centered = self._postprocess_dimred_pcasvd(X_centered, Sigma, components_, explained_variance_)
 
         # Return principal components and eigenvalues to calculate the portion of sample variance explained
         return U, Sigma, Vt
 
 
 
-    def _pca_evd(self, X_centered):
+    def _dimred_pca_evd(self, X_centered):
         """
         Compute EVD based PCA and return Principal Components
             and eigenvalues sorted from high to low
@@ -203,6 +236,7 @@ class DimRed():
         else: print('[dimred]: X is not sparse')
 
         n_samples, n_features = X.shape
+        self.n_samples_, self.n_features_ = n_samples, n_features
         print('[dimred]: X has {} observations and {} features'.format(n_samples, n_features))
 
         if n_features == 1:
@@ -232,7 +266,19 @@ class DimRed():
         return eig_vals[idx], eig_vecs[:, idx]
 
 
-    def _postprocess(self, X, Sigma, components_, explained_variance_):
+    def _postprocess_pca(self, X, pca):
+        """
+        Postprocessing for sklearn PCA
+        """
+        self.explained_variance_ratio_ = pca.explained_variance_ratio_
+        self.singular_values_ = pca.singular_values_
+        self.n_components_ = pca.n_components_
+        self.noise_variance_ = pca.noise_variance_
+
+        return X
+
+
+    def _postprocess_dimred_pcasvd(self, X, Sigma, components_, explained_variance_):
         """
         Postprocessing for PCA SVD
         """
@@ -256,7 +302,6 @@ class DimRed():
             self.noise_variance_ = explained_variance_[n_components:].mean()
         else:
             self.noise_variance_ = 0.
-
         self.components_ = components_[:n_components]
         self.n_components_ = n_components
         self.explained_variance_ = explained_variance_[:n_components]
