@@ -16,8 +16,6 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 #MY_DATA_PATH = os.path.join(THIS_DIR, os.pardir, 'data/data.csv')
 MY_DATA_PATH_MNIST = os.path.join(THIS_DIR, 'data/mnist_only_0_1.csv')
 MY_DATA_PATH_IRIS = os.path.join(THIS_DIR, 'data/iris_data.csv')
-print('MY_DATA_PATH_MNIST = {}'.format(MY_DATA_PATH_MNIST))
-
 
 def test_init():
     dimred = DimRed()
@@ -38,9 +36,9 @@ def test_np_array_2_components():
     explained_variance_ratio = dimred.explained_variance_ratio_
 
     print('\n[test_np_array] - Explained Variance ratio: {}'.format(explained_variance_ratio))
-
     assert(explained_variance_ratio[0] == 0.9924428900898052)
     assert(explained_variance_ratio[1] == 0.007557109910194766)
+
 
 def test_np_array_default_components():
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
@@ -52,9 +50,9 @@ def test_np_array_default_components():
     explained_variance_ratio2 = dimred.explained_variance_ratio_
 
     print('\n[test_np_array] - Explained Variance ratio: {}'.format(explained_variance_ratio))
-
     assert(explained_variance_ratio[0] == 0.9924428900898052)
     assert(explained_variance_ratio2[0] == 0.9924428900898052)
+
 
 def test_np_array_sparse_noncsr():
     # create sparse matrix
@@ -66,19 +64,32 @@ def test_np_array_sparse_noncsr():
     print('\n[test_np_array_sparse_noncsr] - Checking no exception for sparsity of: {}'.format(sparsity))
 
     dimred = DimRed(n_components=1)
-    try:
-        dimred.fit_transform(X_sparse)
-        assert True
-        explained_variance_ratio = dimred.explained_variance_ratio_
-        singular_values = dimred.singular_values_
+    dimred.fit_transform(X_sparse)
+    explained_variance_ratio = dimred.explained_variance_ratio_
+    singular_values = dimred.singular_values_
 
-        print('\n[test_np_array] - Explained Variance ratio: {}'.format(explained_variance_ratio))
-        print('[test_np_array] - Singular Values: {}'.format(singular_values))
+    print('\n[test_np_array] - Explained Variance ratio: {}'.format(explained_variance_ratio))
+    print('[test_np_array] - Singular Values: {}'.format(singular_values))
+    assert(explained_variance_ratio[0] == 0.6666666666666667)
+    assert(singular_values[0] == 2.0000000000000004)
+    assert(dimred.issparse == True)
+    assert(dimred.sparsity == 0.8333333333333334)
+    assert(dimred.sp_issparse == False)
 
-        assert(explained_variance_ratio[0] == 0.6666666666666667)
-        assert(singular_values[0] == 2.0000000000000004)
-    except TypeError:
-        assert False
+
+def test_np_array_sparse_csr():
+    # create sparse matrix
+    X_sparse = np.array([[1,0,0,0,0,0], [0,0,2,0,0,0], [0,0,0,2,0,0]])
+    X_sparse_csr = csr_matrix(X_sparse)
+
+    # calculate sparsity
+    sparsity = 1.0 - csr_matrix.getnnz(X_sparse_csr) / (X_sparse_csr.shape[0] * X_sparse_csr.shape[1])
+    dimred = DimRed(n_components=1)
+    dimred.fit_transform(X_sparse_csr)
+
+    print('\n[test_np_array_sparse_csr] - Checking compressed sparse exception for sparsity of: {}'.format(sparsity))
+    assert(dimred.issparse)
+    assert(dimred.sp_issparse)
 
 
 def test_iris_data():
@@ -95,11 +106,11 @@ def test_iris_data():
 
     print('\n[test_iris_data] - Explained Variance ratio: {}'.format(explained_variance_ratio))
     print('[test_iris_data] - Singular Values: {}'.format(singular_values))
-
     assert(explained_variance_ratio[0] == 0.9246187232017271)
     assert(explained_variance_ratio[1] == 0.05306648311706782)
     assert(singular_values[0] == 25.099960442183864)
     assert(singular_values[1] == 6.013147382308733)
+
 
 def test_mnist_data():
     # loading modified mnist dataset
@@ -128,15 +139,14 @@ def test_mnist_data():
     mnist_dimensions_after_pca = dimred.n_components_
     print('\n[test_mnist_data] - Number of dimensions before PCA: ' + str(mnist_dimensions_before_pca))
     print('[test_mnist_data] - Number of dimensions after PCA: ' + str(mnist_dimensions_after_pca))
-
     assert(mnist_dimensions_before_pca == 784)
     assert(mnist_dimensions_after_pca == 48)
+
 
 def test_center():
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_center_ref = np.array([[-1.33333333, 0., -0.33333333],[-0.33333333, -1., -0.33333333],[1.66666667, 1., 0.66666667]])
     X_center = DimRed._center(X)
-    print(X)
 
     print('\n[test_center] - Checking Matrix Center: _center(X)')
     assert(np.allclose(X_center, X_center_ref))
@@ -146,7 +156,6 @@ def test_covariance():
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
     X_cov = DimRed._cov(X)
-    print(X)
 
     print('\n[test_covariance] - Checking Matrix Covariance: _cov(X)')
     assert(np.array_equal(X_cov, X_cov_ref))
@@ -158,6 +167,7 @@ def test_preprocess():
 
     dimred = DimRed()
     X, n_samples, n_features = dimred._preprocess(X)
+
     print('\n[test_preprocess] - Checking Matrix Center amd n_components: _preprocess(X)')
     assert(np.allclose(X, X_center_ref))
     assert(n_samples == X.shape[0])
@@ -259,6 +269,7 @@ def test_truncated_svd():
     #dimred = DimRed()  #0.95 default
     #X_pca = dimred.fit_transform(X)
 
+    print('\n[test_truncated_svd] - Testing: TruncatedSVD(X)')
     assert(np.allclose(svd.explained_variance_ratio_, explained_variance_ratio_ref))  # avoiding rounding float errors
     assert(svd.explained_variance_ratio_.sum() == explained_variance_ratio_sum_ref)
     assert(np.allclose(svd.singular_values_, singular_values_ref))  # avoiding rounding float errors

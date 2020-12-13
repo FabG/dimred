@@ -5,16 +5,21 @@ DimRed is a python package to perform Dimension Reduction using PCA by default a
 
 """
 import numpy as np
+from numpy import count_nonzero
 import scipy.sparse as sp
+from scipy.sparse import csr_matrix, isspmatrix
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn.decomposition import PCA, SparsePCA, TruncatedSVD
+
+SPARSITY=0.6 # define the %sparsity of a matrix -  0.6 means 60% of values are 0
+N_COMPONENTS = 0.95 # default values for returning components using a variance of 95%
 
 class DimRed():
     """
     Linear dimensionality reduction class
     """
 
-    def __init__(self, algo='pca_svd', n_components=0.95, random_int=None):
+    def __init__(self, algo='pca_svd', n_components=N_COMPONENTS, random_int=None):
         """
         Initialize DimRed with user-defined parameters, defaulting to PCA algorithm
 
@@ -43,6 +48,7 @@ class DimRed():
         # Store in object
         self.n_components = n_components
         self.algo = algo
+        self.sp_issparse = False
         self.issparse = False
         self.random_int = random_int
 
@@ -75,10 +81,8 @@ class DimRed():
         # Preprocessing
         X_centered, n_samples, n_features = self._preprocess(X)
 
-
-
         # Dispath to right PCA algorithm
-        if self.issparse:
+        if self.sp_issparse:
             print('[dimred]: X is sparse - using TruncatedSVD')
             return self._pca_truncated_svd(X)
 
@@ -180,10 +184,24 @@ class DimRed():
         Preprocessing
         """
 
-        # Raise an error for sparse input.
-        # This is more informative than the generic one raised by check_array.
-        if sp.issparse(X):
+        # Check if input matrix is sparse
+        # scipy.sparse defines a number of optimized sparse objects and issparse
+        # determines if the insput is ot type scipy.sparse matrix object
+        # To ntoe some matrixes can still be sparsed but not of that optimized object type
+        if sp.issparse(X): # compressed format
+            self.sp_issparse = True
             self.issparse = True
+            self.sparsity = 1.0 - csr_matrix.getnnz(X) / (X.shape[0] * X.shape[1])
+            print('[dimred]: X is of type scipy.isparse')
+
+        else: # non compressed
+            self.sparsity = 1.0 - count_nonzero(X) / X.size
+            if self.sparsity > SPARSITY:
+                self.issparse = True
+
+        if self.issparse: print('[dimred]: X has a sparsity of: {}'.format(self.sparsity))
+        else: print('[dimred]: X is not sparse')
+
 
         n_samples, n_features = X.shape
 
