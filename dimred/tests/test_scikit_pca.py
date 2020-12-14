@@ -6,6 +6,7 @@ from sklearn.decomposition import PCA, TruncatedSVD, SparsePCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import make_friedman1
 from scipy.sparse import csr_matrix, isspmatrix
+from scipy.sparse import random as sparse_random
 from sklearn import datasets
 
 # Set up absolute path to unit test files
@@ -166,3 +167,22 @@ def test_sparse_pca():
 
     assert (np.mean(transformer.components_ == 0))
     assert (np.allclose(transformer.mean_, X.mean(axis=0)))
+
+def test_truncated_svd():
+    print('\n[test_truncated_svd]')
+    X = sparse_random(100, 100, density=0.01, format='csr', random_state=42)
+    explained_variance_ratio_ref = np.array([0.06461231, 0.06338995, 0.06394725, 0.05351761, 0.04064443])
+    explained_variance_ratio_sum_ref = 0.28611154708177045
+    singular_values_ref = np.array([1.5536061 , 1.51212835, 1.51050701, 1.37044879, 1.19768771])
+
+    svd = TruncatedSVD(n_components=5, random_state=42)
+    X_transformed = svd.fit_transform(X)
+
+    assert(np.allclose(svd.explained_variance_ratio_, explained_variance_ratio_ref))  # avoiding rounding float errors
+    assert(svd.explained_variance_ratio_.sum() == explained_variance_ratio_sum_ref)
+    assert(np.allclose(svd.singular_values_, singular_values_ref))  # avoiding rounding float errors
+
+    assert (X.shape[0] == 100)
+    assert (X.shape[1] == 100)
+    assert (X_transformed.shape[0] == 100)
+    assert (X_transformed.shape[1] == 5)

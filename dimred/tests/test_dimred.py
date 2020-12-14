@@ -321,17 +321,28 @@ def test_dimred_pca_svd():
 
 def test_truncated_svd():
     print('\n[test_truncated_svd]')
-    X = sparse_random(100, 100, density=0.01, format='csr',
-                       random_state=42)
-    explained_variance_ratio_ref = np.array([0.0646051, 0.06339479, 0.06394407, 0.05352903, 0.04062679])
-    explained_variance_ratio_sum_ref = 0.2860997781448586
-    singular_values_ref = np.array([1.55360944, 1.5121377, 1.51052009, 1.37056529, 1.19917045])
-    svd = TruncatedSVD(n_components=5, n_iter=7, random_state=42)
-    svd.fit(X)
+    X = sparse_random(100, 100, density=0.01, format='csr', random_state=42)
+    explained_variance_ratio_ref = np.array([0.06461231, 0.06338995, 0.06394725, 0.05351761, 0.04064443])
+    explained_variance_ratio_sum_ref = 0.28611154708177045
+    singular_values_ref = np.array([1.5536061 , 1.51212835, 1.51050701, 1.37044879, 1.19768771])
 
-    #dimred = DimRed()  #0.95 default
-    #X_pca = dimred.fit_transform(X)
+    svd = TruncatedSVD(n_components=5, random_state=42)
+    #svd = TruncatedSVD(n_components=5, n_iter=7, random_state=42)
+    X_transformed = svd.fit_transform(X)
+
+    dimred = DimRed(algo='sklearn_truncated_svd', n_components=5, random_int=42)  #0.95 default
+    X_transformed2 = dimred.fit_transform(X)
 
     assert(np.allclose(svd.explained_variance_ratio_, explained_variance_ratio_ref))  # avoiding rounding float errors
+    #assert(np.allclose(dimred.explained_variance_ratio_, explained_variance_ratio_ref))  # avoiding rounding float errors
     assert(svd.explained_variance_ratio_.sum() == explained_variance_ratio_sum_ref)
+    #assert(dimred.explained_variance_ratio_.sum() == explained_variance_ratio_sum_ref)
     assert(np.allclose(svd.singular_values_, singular_values_ref))  # avoiding rounding float errors
+    #assert(np.allclose(dimred.singular_values_, singular_values_ref))  # avoiding rounding float errors
+
+    assert (X.shape[0] == 100)
+    assert (X.shape[1] == 100)
+    assert (X_transformed.shape[0] == 100)
+    assert (X_transformed.shape[1] == 5)
+    assert (X_transformed2.shape[0] == 100)
+    assert (X_transformed2.shape[1] == 5)

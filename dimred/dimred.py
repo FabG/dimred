@@ -1,7 +1,11 @@
 """
 dimred.py
 
-DimRed is a python package to perform Dimension Reduction using PCA by default and other algorithms.
+DimRed is a python package to perform Dimension Reduction
+It uses automatically different algorithms based on input data (sparse or not)
+and/or based on user's input parameter.
+Some algorithms come from sklearn: PCA, SparsePCA, TruncatedSVD
+Som others are internally built in numpy to perform PCA with: EVD, SVD
 
 """
 import numpy as np
@@ -11,7 +15,7 @@ from scipy.sparse import csr_matrix, isspmatrix
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn.decomposition import PCA, SparsePCA, TruncatedSVD
 
-SPARSITY=0.6 # define the %sparsity of a matrix -  0.6 means 60% of values are 0
+SPARSITY = 0.6      # define the %sparsity of a matrix -  0.6 means 60% of values are 0
 N_COMPONENTS = 0.95 # default values for returning components using a variance of 95%
 DEFAULT_PCA_ALGO = 'sklearn_pca'
 
@@ -29,14 +33,15 @@ class DimRed():
         algo: Algorithm used to perform Principal Component analysis
             Values:
                 "auto" - pick the PCA method automatically with PCA SVD being the default
-                "pca"  - use scikit learn decomposition.PCA() function based of SVD "as-is"
+                "sklearn_pca"  - use scikit learn decomposition.PCA() function based of SVD "as-is"
                     as a pass-through. Results should be the same as if calling decomposiiton.PCA()
                 "dimred_svd" - use Singular Value Decomposition for PCA with numpy (internally built)
                 "dimred_evd" - use Eigen Value Decomposition for PCA with numpy (internally built)
                     (1) Compute the covariance matrix of the data
                     (2) Compute the eigen values and vectors of this covariance matrix
                     (3) Use the eigen values and vectors to select only the most important feature vectors and then transform your data onto those vectors for reduced dimensionality!
-
+                "sklearn_truncated_svd" - use scikit learn decomposition.TruncatedSVD()
+                "sklearn_sparse_pca" - use scikit learn decomposition.SparsePCA()
             More algorithms will be added to this package over time such as TruncatedSVD.
         n_components : Number of components to keep.
             Missing Value => All components are kept.
@@ -44,9 +49,8 @@ class DimRed():
                 Ex: n_components = 3 => returns Top 3 principal components
             Values < 0 are the components that cover at least the percentage of variance.
                 Ex: n_components = 0.85 => returns all components that cover at least 85% of variance.
-         random : int optional
-                    Random state
-                    Pass an int for reproducible results across multiple function calls.
+         random_int: Pass an int for reproducible results across multiple function calls.
+            Value: int optional (Random state)
         """
 
         # Store in object
@@ -151,6 +155,9 @@ class DimRed():
 
         pca = TruncatedSVD(n_components=self.n_components, random_state=self.random_int)
         X_transf = pca.fit_transform(X)
+
+        # Postprocessing
+        X_transf = self._postprocess_sklearn_truncated_svd(X_transf, pca)
 
         return(X_transf)
 
@@ -321,19 +328,105 @@ class DimRed():
     def _postprocess_sklearn_pca(self, X, pca):
         """
         Postprocessing for sklearn PCA
+
+        Attributes
+        components_ : ndarray of shape (n_components, n_features)
+            Principal axes in feature space, representing the directions of
+            maximum variance in the data. The components are sorted by
+            ``explained_variance_``.
+        explained_variance_ : ndarray of shape (n_components,)
+            The amount of variance explained by each of the selected components.
+            Equal to n_components largest eigenvalues
+            of the covariance matrix of X.
+        explained_variance_ratio_ : ndarray of shape (n_components,)
+            Percentage of variance explained by each of the selected components.
+            If ``n_components`` is not set then all components are stored and the
+            sum of the ratios is equal to 1.0.
+        singular_values_ : ndarray of shape (n_components,)
+            The singular values corresponding to each of the selected components.
+            The singular values are equal to the 2-norms of the ``n_components``
+            variables in the lower-dimensional space.
+        mean_ : ndarray of shape (n_features,)
+            Per-feature empirical mean, estimated from the training set.
+            Equal to `X.mean(axis=0)`.
+        n_components_ : int
+            The estimated number of components. When n_components is set
+            to 'mle' or a number between 0 and 1 (with svd_solver == 'full') this
+            number is estimated from input data. Otherwise it equals the parameter
+            n_components, or the lesser value of n_features and n_samples
+            if n_components is None.
+        n_features_ : int
+            Number of features in the training data.
+        n_samples_ : int
+            Number of samples in the training data.
+        noise_variance_ : float
+            The estimated noise covariance following the Probabilistic PCA model
+            from Tipping and Bishop 1999. See "Pattern Recognition and
+            Machine Learning" by C. Bishop, 12.2.1 p. 574 or
+            http://www.miketipping.com/papers/met-mppca.pdf. It is required to
+            compute the estimated data covariance and score samples.
+            Equal to the average of (min(n_features, n_samples) - n_components)
+            smallest eigenvalues of the covariance matrix of X.
         """
+        self.explained_variance_ = pca.explained_variance_
         self.explained_variance_ratio_ = pca.explained_variance_ratio_
         self.singular_values_ = pca.singular_values_
+        self.mean_ = pca.mean_
+        self.components_ = pca.components_
         self.n_components_ = pca.n_components_
         self.noise_variance_ = pca.noise_variance_
+        self.n_features_ = pca.n_features_
+        self.n_samples_ = pca.n_samples_
 
         return X
+
+
+    def _postprocess_sklearn_truncated_svd(self, X, pca):
+        """
+        Postprocessing for sklearn Truncated SVD
+
+        Attributes:
+        components_ : ndarray of shape (n_components, n_features)
+        explained_variance_ : ndarray of shape (n_components,)
+            The variance of the training samples transformed by a projection to
+            each component.
+        explained_variance_ratio_ : ndarray of shape (n_components,)
+            Percentage of variance explained by each of the selected components.
+        singular_values_ : ndarray od shape (n_components,)
+            The singular values corresponding to each of the selected components.
+            The singular values are equal to the 2-norms of the ``n_components``
+            variables in the lower-dimensional space.
+
+        """
+        self.components_ = pca.components_
+        self.explained_variance_ = pca.explained_variance_
+        self.explained_variance_ratio_ = pca.explained_variance_ratio_
+        self.singular_values_ = pca.singular_values_
+
+        return X
+
 
     def _postprocess_sklearn_sparsepca(self, X, pca):
         """
         Postprocessing for sklearn SparsePCA
+
+        Attributes
+        components_ : ndarray of shape (n_components, n_features)
+            Sparse components extracted from the data.
+        error_ : ndarray
+            Vector of errors at each iteration.
+        n_components_ : int
+            Estimated number of components.
+            .. versionadded:: 0.23
+        n_iter_ : int
+            Number of iterations run.
+        mean_ : ndarray of shape (n_features,)
+            Per-feature empirical mean, estimated from the training set.
+            Equal to ``X.mean(axis=0)``.
         """
+        self.components_ = pca.components_
         self.n_components_ = pca.n_components_
+        self.mean_ = pca.mean_
 
         return X
 
