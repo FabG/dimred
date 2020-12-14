@@ -2,8 +2,9 @@ import os
 import numpy as np
 from numpy import count_nonzero
 import pandas as pd
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, TruncatedSVD, SparsePCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import make_friedman1
 from scipy.sparse import csr_matrix, isspmatrix
 from sklearn import datasets
 
@@ -39,7 +40,7 @@ def test_np_array_sparse_noncsr():
     # calculate sparsity
     sparsity = 1.0 - count_nonzero(X_sparse) / X_sparse.size
     # The above array has 0.833 sparsity (meaning 83.3% of its values are 0)
-    print('\n[test_np_array_sparse_noncsr] - Checking no exception for sparsity of: {}'.format(sparsity))
+    print('\n[test_np_array_sparse_noncsr] - Checking no exception for sparsity of: {:.2f}'.format(sparsity))
 
     pca = PCA(n_components=1)
     try:
@@ -63,7 +64,7 @@ def test_np_array_sparse_csr():
     # calculate sparsity
     sparsity = 1.0 - count_nonzero(X_sparse_array) / X_sparse_array.size
     # The above array has 1.0 sparsity (meaning 100% of its values are 0)
-    print('\n[test_np_array_sparse_csr] - Checking compressed sparse exception for sparsity of: {}'.format(sparsity))
+    print('\n[test_np_array_sparse_csr] - Checking compressed sparse exception for sparsity of: {:.2f}'.format(sparsity))
 
     pca = PCA(n_components=2)
     try:
@@ -118,7 +119,7 @@ def test_iris_data_transform():
     assert(np.allclose(X_pca, X_pca2))  # avoiding rounding float errors
 
 
-def test_mnist_data():
+def test_mnist_data_pca():
     # loading modified mnist dataset
     # It contains 2000 labeled images of each digit 0 and 1. Images are 28x28 pixels
     # Classes: 2 (digits 0 and 1)
@@ -150,3 +151,18 @@ def test_mnist_data():
 
     assert(mnist_dimensions_before_pca == 784)
     assert(mnist_dimensions_after_pca == 48)
+
+
+def test_sparse_pca():
+    X, _ = make_friedman1(n_samples=200, n_features=30, random_state=0)
+    transformer = SparsePCA(n_components=5, random_state=0)
+    transformer.fit(X)
+    X_transformed = transformer.transform(X)
+    # X.shape = (200, 30) => reduced to X_transformed.shape = (200,5)
+    assert (X.shape[0] == 200)
+    assert (X.shape[1] == 30)
+    assert (X_transformed.shape[0] == 200)
+    assert (X_transformed.shape[1] == 5)
+
+    assert (np.mean(transformer.components_ == 0))
+    assert (np.allclose(transformer.mean_, X.mean(axis=0)))

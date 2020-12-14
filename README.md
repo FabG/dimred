@@ -3,6 +3,15 @@
 
 ### 1. DimRed Introduction
 **DimRed** is a python package that enables **Dimension Reduction** and visualization.
+It offers:
+ - internally built SVD and EVD algorithms with `numpy`, namely:
+  - `dimred_pca_svd` - Dimension reduction using the Singular Value Decomposition: `X . V = U . S ==> X = U.S.Vt`
+  - `dimred_pca_evd`- Dimension reduction using the Eigen Value Decomposition
+ - support for sklearn `decomposition` algorithms as a "pass-through", namely:
+   - `PCA()` - see [sklearn_doc](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) for more info
+   - `TruncatedSVD()` for Sparse matrices- see [sklearn_doc](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html) for more info
+   - `SparsePCA()` for Sparse matrices- see [sklearn_doc](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.SparsePCA.html) for more info
+
 
 #### What is Dimension Reduction?
 **Dimension reduction** (or Dimensionality reduction) refers to techniques for reducing the number of input variables in training data.

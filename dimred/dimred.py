@@ -13,13 +13,14 @@ from sklearn.decomposition import PCA, SparsePCA, TruncatedSVD
 
 SPARSITY=0.6 # define the %sparsity of a matrix -  0.6 means 60% of values are 0
 N_COMPONENTS = 0.95 # default values for returning components using a variance of 95%
+DEFAULT_PCA_ALGO = 'sklearn_pca'
 
 class DimRed():
     """
     Linear dimensionality reduction class
     """
 
-    def __init__(self, algo='pca', n_components=N_COMPONENTS, random_int=None):
+    def __init__(self, algo='auto', n_components=N_COMPONENTS, random_int=None):
         """
         Initialize DimRed with user-defined parameters, defaulting to PCA algorithm
 
@@ -27,7 +28,8 @@ class DimRed():
         ----------
         algo: Algorithm used to perform Principal Component analysis
             Values:
-                "pca" (default) - use scikit learn decomposition.PCA() function based of SVD "as-is"
+                "auto" - pick the PCA method automatically with PCA SVD being the default
+                "pca"  - use scikit learn decomposition.PCA() function based of SVD "as-is"
                     as a pass-through. Results should be the same as if calling decomposiiton.PCA()
                 "dimred_svd" - use Singular Value Decomposition for PCA with numpy (internally built)
                 "dimred_evd" - use Eigen Value Decomposition for PCA with numpy (internally built)
@@ -83,29 +85,62 @@ class DimRed():
         # Preprocessing
         X_centered, n_samples, n_features = self._preprocess(X)
 
-        # Dispath to right PCA algorithm
-        if self.sp_issparse:
-            print('[dimred]: X is sparse - using TruncatedSVD')
-            X_dimred = self._pca_truncated_svd(X)
+        # Dispath to right PCA algorithm based on input algo or based on data type
+        # Check Input Matrix
+        print('====TEST self.sp_issparse: {}'.format(self.sp_issparse))
+        print('====TEST self.issparse: {}'.format(self.issparse))
+        print('====TEST self.algo: {}'.format(self.algo))
 
-        if self.algo == 'pca':
+        if self.algo == 'auto':
+
+            if self.sp_issparse:  # X is of type scipy.sparse
+                print('[dimred]: X is sparse and of type scipy.sparse - using sklearn TruncatedSVD')
+                self.algo = 'sklearn_truncated_svd'
+                X_dimred = self._sklearn_truncated_svd(X)
+
+            elif self.issparse: # X is a sparse matrix with lots of 0 but not of type scipy.sparse
+                print('[dimred]: X is sparse - using sklearn SparsePCA')
+                self.algo = 'sklearn_sparse_pca'
+                #X_dimred = self._sklearn_pca(X_centered)
+                # Note - n_components must be an integer for this function
+                if self.n_components < 1:
+                    self.n_components = X.shape[1] - 1
+                    print('[dimred]: SparsePCA can only use n_components as integer - defaulting to {}'.format(self.n_components))
+
+                X_dimred = self._sklearn_sparse_pca(X)
+
+            else: self.algo = DEFAULT_PCA_ALGO  # 'sklearn_pca'
+
+        # Check input algorithm and use default if not available
+        if self.algo == 'sklearn_pca':  # default
             print('[dimred]: using sklearn PCA')
-            X_dimred = self._pca(X_centered)
+            X_dimred = self._sklearn_pca(X_centered)
 
-        if self.algo == 'dimred_svd':
+        elif self.algo == 'dimred_svd':
             print('[dimred]: using DimRed implementation of SVD for PCA')
-            X_dimred = self._dimred_pca_svd(X_centered)
+            X_dimred = self._dimred_svd(X_centered)
 
-        if self.algo == 'dimred_evd':
+        elif self.algo == 'dimred_evd':
             print('[dimred]: using DimRed implementation of EVD for PCA')
-            X_dimred = self._dimred_pca_evd(X_centered)
+            X_dimred = self._dimred_evd(X_centered)
+
+        elif self.algo == 'sklearn_truncated_svd':
+            print('[dimred]: using sklearn TruncatedSVD')
+            X_dimred = self._sklearn_truncated_svd(X_centered)
+
+        elif self.algo == 'sklearn_sparse_pca':
+            print('[dimred]: using sklearn SparsePCA')
+            X_dimred = self._sklearn_sparse_pca(X)
+
+        else:
+            raise ValueError("[DimRed] - not able to run")
 
         return(X_dimred)
 
 
-    def _pca_truncated_svd(self, X):
+    def _sklearn_truncated_svd(self, X):
         """
-        Use ScikitLearn TruncatedSVD
+        Use Scikit Learn TruncatedSVD
         Dimensionality reduction using truncated SVD (aka LSA).
         This transformer performs linear dimensionality reduction by means of
         truncated singular value decomposition (SVD). Contrary to PCA, this
@@ -119,9 +154,10 @@ class DimRed():
 
         return(X_transf)
 
-    def _pca(self, X):
+
+    def _sklearn_pca(self, X):
         """
-        Use ScikitLearn PCA
+        Use Scikit Learn PCA
         Linear dimensionality reduction using Singular Value Decomposition of the
         data to project it to a lower dimensional space. The input data is centered
         but not scaled for each feature before applying the SVD.
@@ -138,12 +174,28 @@ class DimRed():
         X_transf = pca.fit_transform(X)
 
         # Postprocessing
-        X_transf = self._postprocess_pca(X_transf, pca)
+        X_transf = self._postprocess_sklearn_pca(X_transf, pca)
+
+        return(X_transf)
+
+    def _sklearn_sparse_pca(self, X):
+        """
+        Use Scikit Learn Sparse Principal Components Analysis (SparsePCA).
+        Finds the set of sparse components that can optimally reconstruct
+        the data.  The amount of sparseness is controllable by the coefficient
+        of the L1 penalty, given by the parameter alpha.
+        """
+
+        pca = SparsePCA(n_components=self.n_components, random_state=self.random_int)
+        X_transf = pca.fit_transform(X)
+
+        # Postprocessing
+        X_transf = self._postprocess_sklearn_sparsepca(X_transf, pca)
 
         return(X_transf)
 
 
-    def _dimred_pca_svd(self, X_centered):
+    def _dimred_svd(self, X_centered):
         """
         Compute SVD based PCA and return Principal Components
         Principal component analysis using SVD: Singular Value Decomposition
@@ -175,7 +227,7 @@ class DimRed():
 
 
 
-    def _dimred_pca_evd(self, X_centered):
+    def _dimred_evd(self, X_centered):
         """
         Compute EVD based PCA and return Principal Components
             and eigenvalues sorted from high to low
@@ -225,7 +277,7 @@ class DimRed():
             self.sp_issparse = True
             self.issparse = True
             self.sparsity = 1.0 - csr_matrix.getnnz(X) / (X.shape[0] * X.shape[1])
-            print('[dimred]: X is of type scipy.isparse')
+            print('[dimred]: X is sparse and of type scipy.isparse')
 
         else: # non compressed
             self.sparsity = 1.0 - count_nonzero(X) / X.size
@@ -266,7 +318,7 @@ class DimRed():
         return eig_vals[idx], eig_vecs[:, idx]
 
 
-    def _postprocess_pca(self, X, pca):
+    def _postprocess_sklearn_pca(self, X, pca):
         """
         Postprocessing for sklearn PCA
         """
@@ -277,6 +329,13 @@ class DimRed():
 
         return X
 
+    def _postprocess_sklearn_sparsepca(self, X, pca):
+        """
+        Postprocessing for sklearn SparsePCA
+        """
+        self.n_components_ = pca.n_components_
+
+        return X
 
     def _postprocess_dimred_pcasvd(self, X, Sigma, components_, explained_variance_):
         """
