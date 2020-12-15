@@ -36,11 +36,13 @@ class DimRed():
                 "sklearn_pca"  - use scikit learn decomposition.PCA() function based of SVD "as-is"
                     as a pass-through. Results should be the same as if calling decomposiiton.PCA()
                 "dimred_svd" - use Singular Value Decomposition for PCA with numpy (internally built)
+                               this should return the same results as "sklearn_truncated_svd"
                 "dimred_evd" - use Eigen Value Decomposition for PCA with numpy (internally built)
                     (1) Compute the covariance matrix of the data
                     (2) Compute the eigen values and vectors of this covariance matrix
                     (3) Use the eigen values and vectors to select only the most important feature vectors and then transform your data onto those vectors for reduced dimensionality!
                 "sklearn_truncated_svd" - use scikit learn decomposition.TruncatedSVD()
+                       this should return the same results as internally built function "dimred_svd"
                 "sklearn_sparse_pca" - use scikit learn decomposition.SparsePCA()
             More algorithms will be added to this package over time such as TruncatedSVD.
         n_components : Number of components to keep.
@@ -91,9 +93,6 @@ class DimRed():
 
         # Dispath to right PCA algorithm based on input algo or based on data type
         # Check Input Matrix
-        print('====TEST self.sp_issparse: {}'.format(self.sp_issparse))
-        print('====TEST self.issparse: {}'.format(self.issparse))
-        print('====TEST self.algo: {}'.format(self.algo))
 
         if self.algo == 'auto':
 
@@ -130,7 +129,7 @@ class DimRed():
 
         elif self.algo == 'sklearn_truncated_svd':
             print('[dimred]: using sklearn TruncatedSVD')
-            X_dimred = self._sklearn_truncated_svd(X_centered)
+            X_dimred = self._sklearn_truncated_svd(X)
 
         elif self.algo == 'sklearn_sparse_pca':
             print('[dimred]: using sklearn SparsePCA')

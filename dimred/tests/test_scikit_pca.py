@@ -4,10 +4,9 @@ from numpy import count_nonzero
 import pandas as pd
 from sklearn.decomposition import PCA, TruncatedSVD, SparsePCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.datasets import make_friedman1
+from sklearn.datasets import load_iris, make_friedman1
 from scipy.sparse import csr_matrix, isspmatrix
 from scipy.sparse import random as sparse_random
-from sklearn import datasets
 
 # Set up absolute path to unit test files
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -75,7 +74,7 @@ def test_np_array_sparse_csr():
         assert True
 
 def test_iris_data():
-    iris = datasets.load_iris()
+    iris = load_iris()
 
     X = iris.data
     y = iris.target
@@ -96,7 +95,7 @@ def test_iris_data():
 
 
 def test_iris_data_transform():
-    iris = datasets.load_iris()
+    iris = load_iris()
 
     X = iris.data
     y = iris.target

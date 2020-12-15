@@ -2,18 +2,21 @@
 
 
 ### 1. DimRed Introduction
-**DimRed** is a python package that enables **Dimension Reduction** and visualization.
-It offers:
- - internally built SVD and EVD algorithms with `numpy`, namely:
-  - `dimred_pca_svd` - Dimension reduction using the Singular Value Decomposition: `X . V = U . S ==> X = U.S.Vt`
-  - `dimred_pca_evd`- Dimension reduction using the Eigen Value Decomposition
- - support for sklearn `decomposition` algorithms as a "pass-through", namely:
-   - `PCA()` - see [sklearn_doc](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) for more info
-   - `TruncatedSVD()` for Sparse matrices- see [sklearn_doc](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html) for more info
-   - `SparsePCA()` for Sparse matrices- see [sklearn_doc](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.SparsePCA.html) for more info
+**DimRed** is a python package that enables **Dimension Reduction** (and soon visualization).
+
+It offers several functions, some built-in, some others acting as "pass through" for existing scikit learn packages:
+ - internally built SVD and EVD methods with `numpy`:
+  - `dimred_svd` - Dimension reduction using the Singular Value Decomposition: `X . V = U . S ==> X = U.S.Vt`
+  This should return the same results as `sklearn_pca`
+  - `dimred_evd`- Dimension reduction using the Eigen Value Decomposition
+ - "pass through" methods exposing `sklearn.decomposition` algorithms:
+   - `sklearn_pca` - leverages sklearn [PCA()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) that is a Linear dimension reduction function that uses SVD.
+   This should return the same results as numpy based internal implementation of SVD: `dimred_svd`
+   - `sklearn_sparse_pca` - using sklearn [SparsePCA()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.SparsePCA.html) also great for Sparse matrices that are *not* of type `scipy.sparse`
+   - `sklearn_truncated_svd` - leverages sklearn [TruncatedSVD()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html) - great for handling sparse matrices (with lots of 0), that *are* type `scipy.sparse` (`X.sp_issparse` is True).
 
 
-#### What is Dimension Reduction?
+#### 1.1 Refresher on Dimension Reduction
 **Dimension reduction** (or Dimensionality reduction) refers to techniques for reducing the number of input variables in training data.
 
 *When dealing with high dimensional data, it is often useful to reduce the dimensionality by projecting the data to a lower dimensional subspace which captures the “essence” of the data. This is called **dimensionality reduction**.*
@@ -29,21 +32,20 @@ It is **desirable to have simple models that generalize well**, and in turn, inp
 
 
 
-#### Why is Dimension Reduction useful?
-- Reduces training time — due to smaller dataset
-- Removes noise — by keeping only what’s relevant
-- Makes visualization possible — in cases where you have a maximum of 3 principal components
-
-#### How is DimRed implemented and what capabilities does it offer?
-DimRed is offered as a native python package (and soon part of MLaaS as a service). Under the hood, it leverages `numpy` and `scikit-learn` to implement and expose:
- - **PCA** (Principal Component Analysis)
- - **SVD** (Singular Value Decomponsition)
- - **EVD** (Eigen Values Decompoisition)
+#### 1.2 Why is Dimension Reduction useful?
+- **Reduces training time** — due to smaller dataset
+- **Removes noise** — by keeping only what’s relevant
+- **Makes visualization possible** — in cases where you have a maximum of 3 principal components
 
 
-See section 5(Dimension Reduction - Additional info) below for more information about each algorithm
 
 ### 2. DimRed Installation
+
+`DimRed` is currently built as a python package.
+It will be soon hosted in artifactory to be pip installable as well as in MLaaS to be available as a service.
+
+For now, you can use it by cloning this repo and from the home directoy, follow the below steps.
+
 #### 2.1 Install
 You need to run Python 3.X.
 And you should set up a virtual environment with `conda` or `virtualenv`
@@ -85,6 +87,100 @@ We should aim at having a minimum of 80% code coverage, and preferably closer or
 
 
 ### 3. DimRed Examples
+
+#### 3.1 DimRed on Iris dataset (automatic selection)
+Reducing the (150x4) iris matrix to (150x2) with `DimRed` letting the algorithm pick the right algorithm (in that case `sklearn_pca` which is the default algorithm):
+
+```python
+from dimred import DimRed
+from sklearn.datasets import load_iris
+
+iris = load_iris()
+X = iris.data
+
+dimred = DimRed(n_components=2)
+X_pca = dimred.fit_transform(X)
+
+# Algorithm selected for Dimension Reduction
+dimred.algo
+> 'sklearn_pca'
+
+# Matrices shape of both Input matrix and Reduced matrix
+X.shape
+> (150, 4)
+X_pca.shape
+> (150, 2)
+
+# Number of components.
+# If not specified (as we did here with 2), it is estimated from input data
+dimred.n_components_
+> 2
+
+# Principal axes in feature space, representing the directions of maximum variance in the data.
+# The components are sorted by `explained_variance_`.
+dimred.components_
+> array([[ 0.36138659, -0.08452251,  0.85667061,  0.3582892 ],
+       [ 0.65658877,  0.73016143, -0.17337266, -0.07548102]])
+
+# Amount of variance explained by each of the selected components.
+dimred.explained_variance_
+> array([4.22824171, 0.24267075])
+
+# Percentage of variance explained by each of the selected components.
+dimred.explained_variance_ratio_
+> array([0.92461872, 0.05306648])
+
+```
+
+#### 3.2a DimRed on Friedman Sparse dataset (automatic selection)
+Reducing the (30x30) sparse matrix to (30x5) with `DimRed` letting the algorithm pick the right algorithm (in that case `sklearn_sparse_pca` which is using sklearn `SparsePCA()`).
+
+```python
+from dimred import DimRed
+from sklearn.datasets import make_sparse_spd_matrix
+
+X = make_sparse_spd_matrix(dim=30, alpha = .95, random_state=10)
+
+dimred = DimRed(n_components=5, random_int=0)
+X_transformed = dimred.fit_transform(X)
+
+# Check the algorithm automatically picked is `SparsePCA`
+dimred.algo
+> 'sklearn_sparse_pca'
+
+X.shape
+> (30, 30)
+
+X_pca.shape
+> (30, 5))
+
+```
+
+
+#### 3.2b DimRed on Friedman Sparse dataset (forced selection)
+Reducing the (30x30) sparse matrix to (30x5) with `DimRed` specifying the (in that case `sklearn_pca` which is using Singular Value Decomposition).
+
+```python
+from dimred import DimRed
+from sklearn.datasets import make_sparse_spd_matrix
+
+X = make_sparse_spd_matrix(dim=30, alpha = .95, random_state=10)
+
+dimred = DimRed(algo = 'sklearn_pca', n_components=5, random_int=0)
+#dimred = DimRed(algo = 'dimred_svd', n_components=5, random_int=0)
+X_pca = dimred.fit_transform(X)
+
+# Check the algorithm automatically picked is `SparsePCA`
+dimred.algo
+> 'sklearn_pca'
+
+X.shape
+> (30, 30)
+
+X_pca.shape
+> (30, 5))
+
+```
 
 
 ### 4. Dimension Reduction Notebooks

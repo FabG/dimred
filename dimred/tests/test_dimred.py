@@ -5,11 +5,10 @@ import pandas as pd
 from dimred import DimRed
 from scipy.sparse import random as sparse_random
 from scipy.sparse import csr_matrix, isspmatrix
-from sklearn import datasets
-from sklearn.decomposition import TruncatedSVD
+from sklearn.datasets import load_iris, make_friedman1, make_sparse_spd_matrix
+from sklearn.decomposition import TruncatedSVD, SparsePCA
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn.preprocessing import StandardScaler
-from sklearn.datasets import make_friedman1
 
 
 # Set up absolute path to unit test files
@@ -95,8 +94,7 @@ def test_np_array_sparse_csr():
 
 def test_iris_data_pca():
     print('\n[test_iris_data_pca]')
-    iris = datasets.load_iris()
-
+    iris = load_iris()
     X = iris.data
     y = iris.target
 
@@ -114,7 +112,7 @@ def test_iris_data_pca():
 
 def test_iris_data_dimredsvd():
     print('\n[test_iris_data_dimredsvd]')
-    iris = datasets.load_iris()
+    iris = load_iris()
     X = iris.data
     y = iris.target
 
@@ -318,6 +316,57 @@ def test_dimred_pca_svd():
     assert(np.allclose(Sigma, Sigma_ref))  # avoiding rounding float errors
     assert(np.allclose(Sigma2, Sigma_ref))  # avoiding rounding float errors
 
+def test_sparse_pca_forced():
+    print('\n[test_sparse_pca_forced]')
+    X, _ = make_friedman1(n_samples=200, n_features=30, random_state=0)
+
+    transformer = SparsePCA(n_components=5, random_state=0)
+    transformer.fit(X)
+    X_transformed = transformer.transform(X)
+
+    dimred = DimRed(algo='sklearn_sparse_pca', n_components=5, random_int=0)
+    X_pca = dimred.fit_transform(X)
+
+    # X.shape = (200, 30) => reduced to X_transformed.shape = (200,5)
+    assert (X.shape[0] == 200)
+    assert (X.shape[1] == 30)
+    assert (X_transformed.shape[0] == 200)
+    assert (X_transformed.shape[1] == 5)
+    assert (X_pca.shape[0] == 200)
+    assert (X_pca.shape[1] == 5)
+
+    assert (np.mean(transformer.components_ == 0))
+    assert (np.allclose(transformer.mean_, X.mean(axis=0)))
+
+    assert (np.mean(dimred.components_ == 0))
+    assert (np.allclose(dimred.mean_, X.mean(axis=0)))
+
+
+def test_sparse_pca_auto():
+    print('\n[test_sparse_pca_auto]')
+    X = make_sparse_spd_matrix(dim=30, alpha = .95, random_state=10)
+
+    transformer = SparsePCA(n_components=5, random_state=0)
+    transformer.fit(X)
+    X_transformed = transformer.transform(X)
+
+    dimred = DimRed(n_components=5, random_int=0)
+    X_pca = dimred.fit_transform(X)
+
+    # Check the algorithm automatically picked is SparsePCA
+    assert (dimred.algo == 'sklearn_sparse_pca')
+
+    # X.shape = (200, 30) => reduced to X_transformed.shape = (200,5)
+    assert (X.shape == (30, 30))
+    assert (X_transformed.shape == (30, 5))
+    assert (X_pca.shape == (30, 5))
+
+    assert (np.mean(transformer.components_ == 0))
+    assert (np.allclose(transformer.mean_, X.mean(axis=0)))
+
+    assert (np.mean(dimred.components_ == 0))
+    assert (np.allclose(dimred.mean_, X.mean(axis=0)))
+
 
 def test_truncated_svd():
     print('\n[test_truncated_svd]')
@@ -334,11 +383,11 @@ def test_truncated_svd():
     X_transformed2 = dimred.fit_transform(X)
 
     assert(np.allclose(svd.explained_variance_ratio_, explained_variance_ratio_ref))  # avoiding rounding float errors
-    #assert(np.allclose(dimred.explained_variance_ratio_, explained_variance_ratio_ref))  # avoiding rounding float errors
+    assert(np.allclose(dimred.explained_variance_ratio_, explained_variance_ratio_ref))  # avoiding rounding float errors
     assert(svd.explained_variance_ratio_.sum() == explained_variance_ratio_sum_ref)
-    #assert(dimred.explained_variance_ratio_.sum() == explained_variance_ratio_sum_ref)
+    assert(dimred.explained_variance_ratio_.sum() == explained_variance_ratio_sum_ref)
     assert(np.allclose(svd.singular_values_, singular_values_ref))  # avoiding rounding float errors
-    #assert(np.allclose(dimred.singular_values_, singular_values_ref))  # avoiding rounding float errors
+    assert(np.allclose(dimred.singular_values_, singular_values_ref))  # avoiding rounding float errors
 
     assert (X.shape[0] == 100)
     assert (X.shape[1] == 100)
