@@ -126,7 +126,7 @@ def test_iris_data_dimredsvd():
     print('\n[test_iris_data_dimredsvd]')
     iris = load_iris()
     X = iris.data
-    y = iris.target
+    #y = iris.target
 
     dimred = DimRed(n_components=2, algo="dimred_svd")
     X_pca = dimred.fit_transform(X)
@@ -139,6 +139,8 @@ def test_iris_data_dimredsvd():
     assert(singular_values[0] == 25.099960442183864)
     assert(singular_values[1] == 6.013147382308733)
 
+    #assert(X_pca.shape == (6,2))
+    assert(dimred.algo == 'dimred_svd')
 
 def test_mnist_data_dimred_svd():
     print('\n[test_mnist_data_dimred_svd]')
