@@ -25,40 +25,51 @@ def test_init():
     dimred4 = DimRed(algo='sklearn_truncated_svd', n_components=1)
     dimred5 = DimRed(algo='sklearn_sparse_pca', n_components=2)
 
-    assert (dimred.n_components == 0.95)
-    assert (dimred.algo == 'auto')
-    assert (dimred2.n_components == 0.95)
-    assert (dimred2.algo == 'dimred_svd')
-    assert (dimred3.n_components == 3)
-    assert (dimred3.algo == 'dimred_evd')
-    assert (dimred4.n_components == 1)
-    assert (dimred4.algo == 'sklearn_truncated_svd')
-    assert (dimred5.n_components == 2)
-    assert (dimred5.algo == 'sklearn_sparse_pca')
+    assert(dimred.n_components == 0.95)
+    assert(dimred.algo == 'auto')
+    assert(dimred2.n_components == 0.95)
+    assert(dimred2.algo == 'dimred_svd')
+    assert(dimred3.n_components == 3)
+    assert(dimred3.algo == 'dimred_evd')
+    assert(dimred4.n_components == 1)
+    assert(dimred4.algo == 'sklearn_truncated_svd')
+    assert(dimred5.n_components == 2)
+    assert(dimred5.algo == 'sklearn_sparse_pca')
+
 
 def test_np_array_2_components():
     print('\n[test_np_array_2_components')
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
     dimred = DimRed(n_components=2)
-    model = dimred.fit_transform(X)
+    X_pca = dimred.fit_transform(X)
     explained_variance_ratio = dimred.explained_variance_ratio_
 
     assert(explained_variance_ratio[0] == 0.9924428900898052)
     assert(explained_variance_ratio[1] == 0.007557109910194766)
+
+    assert(X.shape == (6,2))
+    assert(X_pca.shape == (6,2))
+    assert(dimred.algo == 'sklearn_pca')
 
 
 def test_np_array_default_components():
     print('\n[test_np_array_default_components]')
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
     dimred = DimRed()  #0.95 default
-    dimred2 = DimRed(n_components=0.90)
-    model = dimred.fit_transform(X)
-    model2 = dimred2.fit_transform(X)
+    dimred2 = DimRed(n_components=0.40)
+    X_pca = dimred.fit_transform(X)
+    X_pca2 = dimred2.fit_transform(X)
     explained_variance_ratio = dimred.explained_variance_ratio_
     explained_variance_ratio2 = dimred2.explained_variance_ratio_
 
     assert(explained_variance_ratio[0] == 0.9924428900898052)
     assert(explained_variance_ratio2[0] == 0.9924428900898052)
+
+    assert(X.shape == (6,2))
+    assert(X_pca.shape == (6,1))
+    assert(X_pca2.shape == (6,1))
+    assert(dimred.algo == 'sklearn_pca')
+    assert(dimred2.algo == 'sklearn_pca')
 
 
 def test_np_array_sparse_noncsr():
@@ -91,6 +102,7 @@ def test_np_array_sparse_csr():
 
     assert(dimred.issparse)
     assert(dimred.sp_issparse)
+
 
 def test_iris_data_pca():
     print('\n[test_iris_data_pca]')
@@ -220,6 +232,7 @@ def test_preprocess_feature_is_one():
     except:
         assert True
 
+
 def test_preprocess_components_high():
     print('\n[test_preprocess_components_high]')
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
@@ -229,7 +242,6 @@ def test_preprocess_components_high():
     dimred = DimRed(n_components=HIGH_COMPONENTS)
     dimred.fit_transform(X)
     assert(dimred.n_components == X.shape[1] - 1)
-
 
 
 def test_eigen_sorted():
@@ -316,6 +328,7 @@ def test_dimred_pca_svd():
     assert(np.allclose(Sigma, Sigma_ref))  # avoiding rounding float errors
     assert(np.allclose(Sigma2, Sigma_ref))  # avoiding rounding float errors
 
+
 def test_sparse_pca_forced():
     print('\n[test_sparse_pca_forced]')
     X, _ = make_friedman1(n_samples=200, n_features=30, random_state=0)
@@ -327,19 +340,15 @@ def test_sparse_pca_forced():
     dimred = DimRed(algo='sklearn_sparse_pca', n_components=5, random_int=0)
     X_pca = dimred.fit_transform(X)
 
-    # X.shape = (200, 30) => reduced to X_transformed.shape = (200,5)
-    assert (X.shape[0] == 200)
-    assert (X.shape[1] == 30)
-    assert (X_transformed.shape[0] == 200)
-    assert (X_transformed.shape[1] == 5)
-    assert (X_pca.shape[0] == 200)
-    assert (X_pca.shape[1] == 5)
+    assert(X.shape == (200,30))
+    assert(X_transformed.shape == (200,5))
+    assert(X_pca.shape == (200,5))
 
-    assert (np.mean(transformer.components_ == 0))
-    assert (np.allclose(transformer.mean_, X.mean(axis=0)))
+    assert(np.mean(transformer.components_ == 0))
+    assert(np.allclose(transformer.mean_, X.mean(axis=0)))
 
-    assert (np.mean(dimred.components_ == 0))
-    assert (np.allclose(dimred.mean_, X.mean(axis=0)))
+    assert(np.mean(dimred.components_ == 0))
+    assert(np.allclose(dimred.mean_, X.mean(axis=0)))
 
 
 def test_sparse_pca_auto():
@@ -354,18 +363,17 @@ def test_sparse_pca_auto():
     X_pca = dimred.fit_transform(X)
 
     # Check the algorithm automatically picked is SparsePCA
-    assert (dimred.algo == 'sklearn_sparse_pca')
+    assert(dimred.algo == 'sklearn_sparse_pca')
 
-    # X.shape = (200, 30) => reduced to X_transformed.shape = (200,5)
-    assert (X.shape == (30, 30))
-    assert (X_transformed.shape == (30, 5))
-    assert (X_pca.shape == (30, 5))
+    assert(X.shape == (30, 30))
+    assert(X_transformed.shape == (30, 5))
+    assert(X_pca.shape == (30, 5))
 
-    assert (np.mean(transformer.components_ == 0))
-    assert (np.allclose(transformer.mean_, X.mean(axis=0)))
+    assert(np.mean(transformer.components_ == 0))
+    assert(np.allclose(transformer.mean_, X.mean(axis=0)))
 
-    assert (np.mean(dimred.components_ == 0))
-    assert (np.allclose(dimred.mean_, X.mean(axis=0)))
+    assert(np.mean(dimred.components_ == 0))
+    assert(np.allclose(dimred.mean_, X.mean(axis=0)))
 
 
 def test_truncated_svd():
@@ -376,7 +384,6 @@ def test_truncated_svd():
     singular_values_ref = np.array([1.5536061 , 1.51212835, 1.51050701, 1.37044879, 1.19768771])
 
     svd = TruncatedSVD(n_components=5, random_state=42)
-    #svd = TruncatedSVD(n_components=5, n_iter=7, random_state=42)
     X_transformed = svd.fit_transform(X)
 
     dimred = DimRed(algo='sklearn_truncated_svd', n_components=5, random_int=42)  #0.95 default
@@ -389,9 +396,6 @@ def test_truncated_svd():
     assert(np.allclose(svd.singular_values_, singular_values_ref))  # avoiding rounding float errors
     assert(np.allclose(dimred.singular_values_, singular_values_ref))  # avoiding rounding float errors
 
-    assert (X.shape[0] == 100)
-    assert (X.shape[1] == 100)
-    assert (X_transformed.shape[0] == 100)
-    assert (X_transformed.shape[1] == 5)
-    assert (X_transformed2.shape[0] == 100)
-    assert (X_transformed2.shape[1] == 5)
+    assert(X.shape == (100, 100))
+    assert(X_transformed.shape == (100, 5))
+    assert(X_transformed2.shape == (100, 5))

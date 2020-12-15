@@ -159,13 +159,11 @@ def test_sparse_pca():
     transformer.fit(X)
     X_transformed = transformer.transform(X)
     # X.shape = (200, 30) => reduced to X_transformed.shape = (200,5)
-    assert (X.shape[0] == 200)
-    assert (X.shape[1] == 30)
-    assert (X_transformed.shape[0] == 200)
-    assert (X_transformed.shape[1] == 5)
+    assert(X.shape == (200, 30))
+    assert(X_transformed.shape == (200, 5))
 
-    assert (np.mean(transformer.components_ == 0))
-    assert (np.allclose(transformer.mean_, X.mean(axis=0)))
+    assert(np.mean(transformer.components_ == 0))
+    assert(np.allclose(transformer.mean_, X.mean(axis=0)))
 
 def test_truncated_svd():
     print('\n[test_truncated_svd]')
@@ -181,7 +179,5 @@ def test_truncated_svd():
     assert(svd.explained_variance_ratio_.sum() == explained_variance_ratio_sum_ref)
     assert(np.allclose(svd.singular_values_, singular_values_ref))  # avoiding rounding float errors
 
-    assert (X.shape[0] == 100)
-    assert (X.shape[1] == 100)
-    assert (X_transformed.shape[0] == 100)
-    assert (X_transformed.shape[1] == 5)
+    assert(X.shape == (100, 100))
+    assert(X_transformed.shape == (100, 5))
