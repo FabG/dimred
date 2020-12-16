@@ -261,8 +261,8 @@ def test_eigen_sorted():
     assert(np.allclose(X_eig_vecs, X_eig_vecs_ref))  # avoiding rounding float errors
 
 
-def test_dimred_pca_evd():
-    print('\n[test_pca_evd]')
+def test_dimred_evd():
+    print('\n[test_evd]')
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_vec_ref = np.array([[-2.63957145,  2.94002954,  3.06412939],
                         [-3.02011565,  1.57797737,  3.06412939],
@@ -292,43 +292,42 @@ def test_dimred_pca_evd():
     assert(np.allclose(e_vals_fct, e_vals_ref))  # avoiding rounding float errors
 
 
-def test_dimred_pca_svd():
-    print('\n[test_dimred_pca_svd]')
+def test_dimred_svd():
+    print('\n[test_dimred_svd]')
 
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
-    U_ref = np.array([[-0.48117093, -0.65965234,  0.57735027],
-                            [-0.33069022,  0.74653242,  0.57735027],
-                            [ 0.81186114, -0.08688008,  0.57735027]])
-    Vt_ref = np.array([[ 0.83234965,  0.45180545,  0.32103877],
-                        [ 0.50163583, -0.86041634, -0.08969513],
-                        [-0.23570226, -0.23570226,  0.94280904]])
+    U_ref = np.array([[-0.48117093, -0.65965234, 0.57735027],
+                        [-0.33069022, 0.74653242, 0.57735027],
+                        [ 0.81186114, -0.08688008, 0.57735027]])
     Sigma_ref = np.array([2.52885697e+00, 9.68615374e-01, 5.82986245e-16])
+    Vt_ref = np.array([[ 0.83234965, 0.45180545, 0.32103877],
+                        [ 0.50163583, -0.86041634, -0.08969513],
+                        [-0.23570226, -0.23570226, 0.94280904]])
 
-    dimred = DimRed()  #0.95 default
+    dimred = DimRed(algo='dimred_svd')  #0.95 default
 
     # Center matrix
-    n_samples, n_features = X.shape
     x_mean_vec = np.mean(X, axis=0)
     X_centered = X - x_mean_vec
 
     # SVD - manual
     U, Sigma, Vt = np.linalg.svd(X_centered, full_matrices=False)
     U, Vt = svd_flip(U, Vt)
-    components_ = Vt
-    explained_variance_ = (Sigma ** 2) / (n_samples - 1)
+    print(U)
 
-    # post preprocessing
-    X_centered = dimred._postprocess_dimred_pcasvd(X_centered, Sigma, components_, explained_variance_)
+    # flip eigenvectors' sign to enforce deterministic output
+    X_transf = dimred._postprocess_dimred_pcasvd(U, Sigma, Vt)
 
     # SVD - function
-    U2, Sigma2, Vt2 = dimred._dimred_svd(X_centered)
+    X_transformed = dimred.fit_transform(X)
 
+    assert(X.shape == (3,3))
+    assert(X_transf.shape == (3,2))
+    assert(X_transformed.shape == (3,2))
     assert(np.allclose(U, U_ref))  # avoiding rounding float errors
-    assert(np.allclose(U2, U_ref))  # avoiding rounding float errors
-    assert(np.allclose(Vt, Vt_ref))  # avoiding rounding float errors
     assert(np.allclose(Vt, Vt_ref))  # avoiding rounding float errors
     assert(np.allclose(Sigma, Sigma_ref))  # avoiding rounding float errors
-    assert(np.allclose(Sigma2, Sigma_ref))  # avoiding rounding float errors
+    assert(np.allclose(X_transf, X_transformed))  # avoiding rounding float errors
 
 
 def test_sparse_pca_forced():

@@ -212,25 +212,18 @@ class DimRed():
          mxn  matrix via an extension of the polar decomposition.
 
         """
-        n_samples, n_features = X_centered.shape
-
         # SVD
         # full_matricesbool = False => U and Vh are of shape (M, K) and (K, N), where K = min(M, N).
         U, Sigma, Vt = np.linalg.svd(X_centered, full_matrices=False)
 
         # flip eigenvectors' sign to enforce deterministic output
         U, Vt = svd_flip(U, Vt)
-        components_ = Vt
-
-        # Get variance explained by singular values
-        explained_variance_ = (Sigma ** 2) / (n_samples - 1)
 
         # Postprocess the number of components required
-        X_centered = self._postprocess_dimred_pcasvd(X_centered, Sigma, components_, explained_variance_)
+        X_transf = self._postprocess_dimred_pcasvd(U, Sigma, Vt)
 
         # Return principal components and eigenvalues to calculate the portion of sample variance explained
-        return U, Sigma, Vt
-
+        return X_transf
 
 
     def _dimred_evd(self, X_centered):
@@ -429,14 +422,19 @@ class DimRed():
 
         return X
 
-    def _postprocess_dimred_pcasvd(self, X, Sigma, components_, explained_variance_):
+    def _postprocess_dimred_pcasvd(self, U, Sigma, Vt):
         """
         Postprocessing for PCA SVD
         """
-        n_samples, n_features = X.shape
+        n_samples, n_features = U.shape
 
         if self.n_components is None:
             self.n_components = X.shape[1] - 1
+
+        components_ = Vt
+
+        # Get variance explained by singular values
+        explained_variance_ = (Sigma ** 2) / (n_samples - 1)
 
         total_var = explained_variance_.sum()
         explained_variance_ratio_ = explained_variance_ / total_var
@@ -460,4 +458,8 @@ class DimRed():
             explained_variance_ratio_[:n_components]
         self.singular_values_ = singular_values_[:n_components]
 
-        return X
+        X_transf = np.empty([U.shape[0], self.n_components_])
+        X_transf[:] = U[:, :self.n_components_]
+        X_transf *= Sigma[:self.n_components_]
+
+        return X_transf
