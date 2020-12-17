@@ -104,8 +104,8 @@ def test_np_array_sparse_csr():
     assert(dimred.sp_issparse)
 
 
-def test_iris_data_pca():
-    print('\n[test_iris_data_pca]')
+def test_iris_data_sklearn_pca():
+    print('\n[test_iris_data_sklearn_pca]')
     iris = load_iris()
     X = iris.data
     y = iris.target
@@ -116,14 +116,15 @@ def test_iris_data_pca():
     explained_variance_ratio = dimred.explained_variance_ratio_
     singular_values = dimred.singular_values_
 
+    assert(dimred.algo == 'sklearn_pca')
     assert(explained_variance_ratio[0] == 0.9246187232017271)
     assert(explained_variance_ratio[1] == 0.05306648311706783)
     assert(singular_values[0] == 25.099960442183864)
     assert(singular_values[1] == 6.013147382308734)
 
 
-def test_iris_data_dimredsvd():
-    print('\n[test_iris_data_dimredsvd]')
+def test_iris_data_dimred_svd():
+    print('\n[test_iris_data_dimred_svd]')
     iris = load_iris()
     X = iris.data
     #y = iris.target
@@ -133,14 +134,63 @@ def test_iris_data_dimredsvd():
 
     explained_variance_ratio = dimred.explained_variance_ratio_
     singular_values = dimred.singular_values_
+    components = dimred.n_components_
 
+    assert(X.shape == (150, 4))
+    assert(X_pca.shape == (150,2))
+    assert(dimred.algo == 'dimred_svd')
     assert(explained_variance_ratio[0] == 0.9246187232017271)
     assert(explained_variance_ratio[1] == 0.05306648311706782)
     assert(singular_values[0] == 25.099960442183864)
     assert(singular_values[1] == 6.013147382308733)
+    assert(components == 2)
 
-    #assert(X_pca.shape == (6,2))
+
+def test_iris_data_sklearn_pca():
+    print('\n[test_iris_data_sklearn_pca]')
+    iris = load_iris()
+    X = iris.data
+    y = iris.target
+
+    dimred = DimRed(n_components=2)
+    X_pca = dimred.fit_transform(X)
+
+    explained_variance_ratio = dimred.explained_variance_ratio_
+    singular_values = dimred.singular_values_
+
+    assert(dimred.algo == 'sklearn_pca')
+    assert(explained_variance_ratio[0] == 0.9246187232017271)
+    assert(explained_variance_ratio[1] == 0.05306648311706783)
+    assert(singular_values[0] == 25.099960442183864)
+    assert(singular_values[1] == 6.013147382308734)
+
+
+def test_iris_data_dimred_svd_equal_sklearn_pca():
+    print('\n[test_iris_data_dimred_svd_equal_sklearn_pca]')
+    iris = load_iris()
+    X = iris.data
+
+    dimred = DimRed(n_components=2, algo="dimred_svd")
+    dimred_sk = DimRed(n_components=2, algo="sklearn_pca")
+    X_pca = dimred.fit_transform(X)
+    X_pca_sk = dimred_sk.fit_transform(X)
+
+    explained_variance_ratio = dimred.explained_variance_ratio_
+    singular_values = dimred.singular_values_
+    components = dimred.n_components_
+    explained_variance_ratio_sk = dimred_sk.explained_variance_ratio_
+    singular_values_sk = dimred_sk.singular_values_
+    components_sk = dimred_sk.n_components_
+
+    assert(X.shape == (150, 4))
+    assert(X_pca.shape == (150,2))
+    assert(X_pca_sk.shape == (150,2))
     assert(dimred.algo == 'dimred_svd')
+    assert(dimred_sk.algo == 'sklearn_pca')
+    assert(explained_variance_ratio == explained_variance_ratio_sk)
+    assert(singular_values == singular_values)
+    assert(components == components_sk)
+
 
 def test_mnist_data_dimred_svd():
     print('\n[test_mnist_data_dimred_svd]')
@@ -163,12 +213,14 @@ def test_mnist_data_dimred_svd():
     scaler.fit(X)
 
     dimred = DimRed(algo='dimred_svd', n_components = .90) # n_components = .90 means that scikit-learn will choose the minimum number of principal components such that 90% of the variance is retained.
-    dimred.fit_transform(X)
+    X_pca = dimred.fit_transform(X)
 
-    mnist_dimensions_before_pca = len(pixel_colnames)
-    mnist_dimensions_after_pca = dimred.n_components_
+    mnist_dimensions_before_pca = X.shape[1]
+    mnist_dimensions_after_pca = X_pca.shape[1]
+    components = dimred.n_components_
     assert(mnist_dimensions_before_pca == 784)
     assert(mnist_dimensions_after_pca == 48)
+    assert(components == 48)
 
 
 def test_mnist_data_dimredsvd():
