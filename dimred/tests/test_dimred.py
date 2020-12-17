@@ -175,22 +175,51 @@ def test_iris_data_dimred_svd_equal_sklearn_pca():
     X_pca = dimred.fit_transform(X)
     X_pca_sk = dimred_sk.fit_transform(X)
 
-    explained_variance_ratio = dimred.explained_variance_ratio_
-    singular_values = dimred.singular_values_
-    components = dimred.n_components_
-    explained_variance_ratio_sk = dimred_sk.explained_variance_ratio_
-    singular_values_sk = dimred_sk.singular_values_
-    components_sk = dimred_sk.n_components_
+    explained_variance_ratio_ = dimred.explained_variance_ratio_
+    singular_values_ = dimred.singular_values_
+    components_ = dimred.components_
+    n_components_ = dimred.n_components_
+
+    explained_variance_ratio_sk_ = dimred_sk.explained_variance_ratio_
+    singular_values_sk_ = dimred_sk.singular_values_
+    components_sk_ = dimred_sk.components_
+    n_components_sk_ = dimred_sk.n_components_
 
     assert(X.shape == (150, 4))
-    assert(X_pca.shape == (150,2))
-    assert(X_pca_sk.shape == (150,2))
+    assert(X_pca.shape == (150, 2))
+    assert(X_pca_sk.shape == (150, 2))
     assert(dimred.algo == 'dimred_svd')
     assert(dimred_sk.algo == 'sklearn_pca')
-    assert(explained_variance_ratio == explained_variance_ratio_sk)
-    assert(singular_values == singular_values)
-    assert(components == components_sk)
+    assert(np.allclose(explained_variance_ratio_, explained_variance_ratio_sk_))
+    assert(np.allclose(singular_values_, singular_values_sk_))
+    assert(np.allclose(n_components_, n_components_sk_))
 
+
+def test_iris_data_dimred_svd_equal_sklearn_pca_1_comp():
+    print('\n[test_iris_data_dimred_svd_equal_sklearn_pca_1_comp]')
+    iris = load_iris()
+    X = iris.data
+
+    dimred = DimRed(n_components=1, algo="dimred_svd")
+    dimred_sk = DimRed(n_components=1, algo="sklearn_pca")
+    X_pca = dimred.fit_transform(X)
+    X_pca_sk = dimred_sk.fit_transform(X)
+
+    explained_variance_ratio_ = dimred.explained_variance_ratio_
+    singular_values_ = dimred.singular_values_
+    n_components_ = dimred.n_components_
+    explained_variance_ratio_sk_ = dimred_sk.explained_variance_ratio_
+    singular_values_sk_ = dimred_sk.singular_values_
+    n_components_sk_ = dimred_sk.n_components_
+
+    assert(X.shape == (150, 4))
+    assert(X_pca.shape == (150, 1))
+    assert(X_pca_sk.shape == (150, 1))
+    assert(dimred.algo == 'dimred_svd')
+    assert(dimred_sk.algo == 'sklearn_pca')
+    assert(np.allclose(explained_variance_ratio_, explained_variance_ratio_sk_))
+    assert(np.allclose(singular_values_, singular_values_sk_))
+    assert(np.allclose(n_components_, n_components_sk_))
 
 def test_mnist_data_dimred_svd():
     print('\n[test_mnist_data_dimred_svd]')

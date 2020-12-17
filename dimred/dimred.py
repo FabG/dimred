@@ -441,6 +441,7 @@ class DimRed():
         singular_values_ = Sigma.copy()  # Store the singular values.
 
         n_components = self.n_components
+        # converting n_components ratio to an integer based on variance
         if 0 < n_components < 1.0:
             ratio_cumsum = stable_cumsum(explained_variance_ratio_)
             n_components = np.searchsorted(ratio_cumsum, n_components,
@@ -451,7 +452,7 @@ class DimRed():
             self.noise_variance_ = explained_variance_[n_components:].mean()
         else:
             self.noise_variance_ = 0.
-        self.components_ = components_[:n_components]
+        self.components_ = components_[0:n_components]
         self.n_components_ = n_components
         self.explained_variance_ = explained_variance_[:n_components]
         self.explained_variance_ratio_ = \
