@@ -21,6 +21,17 @@ It offers several functions, some built-in, some others acting as "pass through"
    - `sklearn_sparse_pca` - using sklearn [SparsePCA()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.SparsePCA.html) also great for Sparse matrices that are *not* of type `scipy.sparse`
    - `sklearn_truncated_svd` - leverages sklearn [TruncatedSVD()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html) - great for handling sparse matrices (with lots of 0), that *are* type `scipy.sparse` (`X.sp_issparse` is True).
 
+Here is an example with `PCA` (Principal Component Analysis) that is using a Linear Dimension reduction algorithm to project your data to a lower dimensional space. It is an **unsupervised** technique for `feature extraction` by combining input variables in a specific way so that the output "new" variables (or components) are all `independent of one another`.
+
+PCA aims to find linearly uncorrelated orthogonal axes, which are also known as principal components (PCs) in the m dimensional space to project the data points onto those PCs. The first PC captures the largest variance in the data. Let’s intuitively understand PCA by fitting it on a 2-D data matrix, which can be conveniently represented by a 2-D scatter plot:
+
+   <p align="center" width="100%">
+       <img width="70%" src="images/pca_animation.gif">
+       <br><i>Making sense of PCA by fitting on a 2-D dataset<a href="https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues/140579#140579"> (source)</a></i>
+   </p>
+Since all the PCs (Principal Components) are orthogonal to each other, we can use a pair of perpendicular lines in the 2-D space as the two PCs. To make the first PC capture the largest variance, we rotate our pair of PCs to make one of them optimally align with the spread of the data points. Next, all the data points can be projected onto the PCs, and their projections (red dots on PC1) are essentially the resultant dimensionality-reduced representation of the dataset. Viola, we just reduced the matrix from 2-D to 1-D while retaining the largest variance!
+
+
 ### Table of contents
 * [Refresher on Dimension Reduction](#refresher-dimred)
 * [DimRed Installation](#dimred-installation)
@@ -242,13 +253,20 @@ There is no best dimensionality reduction algorithm, and no easy way to find the
 #### PCA
 When using `PCA` (Principal Component Analysis), you are using a Linear Dimension reduction algorithm, that will project your data to a lower dimensional space. It is an **unsupervised** technique for `feature extraction` by combining input variables in a specific way so that the output "new" variables (or components) are all `independant of one another`. This is a benefit because of the assumptions of a linear model.
 
-PCA aims to find linearly uncorrelated orthogonal axes, which are also known as principal components (PCs) in the m dimensional space to project the data points onto those PCs. The first PC captures the largest variance in the data. Let’s intuitively understand PCA by fitting it on a 2-D data matrix, which can be conveniently represented by a 2-D scatter plot:
+PCA aims to find linearly uncorrelated orthogonal axes, which are also known as principal components (PCs) in the m dimensional space to project the data points onto those PCs. The first PC captures the largest variance in the data.
+
+Let’s intuitively understand PCA by fitting it on a 3-D data matrix, which can be conveniently represented by a 3-D scatter plot:
+
 <p align="center" width="100%">
-    <img width="70%" src="images/pca_animation.gif">
-    <br><i>Making sense of PCA by fitting on a 2-D dataset<a href="https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues/140579#140579"> (source)</a></i>
+    <img width="70%" src="images/pca_3d_2d.png">
+    <br><i>3D to 2D dimension reduction with PCA <a href="https://medium.com/@TheDataGyan/dimensionality-reduction-with-pca-and-t-sne-in-r-2715683819"> (source)</a></i>
 </p>
 
-Since all the PCs (Principal Components) are orthogonal to each other, we can use a pair of perpendicular lines in the 2-D space as the two PCs. To make the first PC capture the largest variance, we rotate our pair of PCs to make one of them optimally align with the spread of the data points. Next, all the data points can be projected onto the PCs, and their projections (red dots on PC1) are essentially the resultant dimensionality-reduced representation of the dataset. Viola, we just reduced the matrix from 2-D to 1-D while retaining the largest variance!
+Here you can see:
+ - first image has three dimensional data with `X`,`Y` and `Z` axes.
+ - second image is a two dimensional space with `PC1` and `PC2` as axes.
+
+Note these `PC1` and `PC2` are *not* our regular dimensions and we cannot name them with any of the previous attribute names. They represent the orthogonal projections along which the variance of data is high. We will understand more about it while dealing with PCA below.
 
 The PCs can be determined via eigen decomposition of the covariance matrix C. After all, the geometrical meaning of eigen decomposition is to find a new coordinate system of the eigenvectors for C through rotations.
 Image for post
@@ -426,6 +444,8 @@ using the SVD to perform PCA makes much better sense numerically than forming th
  - [Difference between EVD and SVD](https://math.stackexchange.com/questions/320220/intuitively-what-is-the-difference-between-eigendecomposition-and-singular-valu)
  - [Dimension reduction algorithms in python](https://machinelearningmastery.com/dimensionality-reduction-algorithms-with-python/)
  - [PCA explained on wine data with chart animation](https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues/140579#140579)
+ - [Dimensionality Reduction with PCA and t-SNE in R](https://medium.com/@TheDataGyan/dimensionality-reduction-with-pca-and-t-sne-in-r-2715683819)
+
 
 #### DataSets (for Unit Tests)
 We are using various datasets:
