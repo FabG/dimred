@@ -1,8 +1,13 @@
 # DimRed - Dimension Reduction Package
 
 
-### 1. DimRed Introduction
-**DimRed** is a python package that enables **Dimension Reduction** (and soon visualization).
+### DimRed Introduction
+<img align="left" src="images/DimRed_Logo_s.jpg" width="170" height="100" style="vertical-align:left;margin:0px 10px">
+
+**DimRed** is a python package that enables **Dimension Reduction** leveraging various algorithms with the default being
+  **PCA** (Principal Component Analysis).
+This package will also soon offer visualization capabilities.
+
 
 It offers several functions, some built-in, some others acting as "pass through" for existing scikit learn packages:
  - internally built SVD and EVD methods with `numpy`:
@@ -15,8 +20,16 @@ It offers several functions, some built-in, some others acting as "pass through"
    - `sklearn_sparse_pca` - using sklearn [SparsePCA()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.SparsePCA.html) also great for Sparse matrices that are *not* of type `scipy.sparse`
    - `sklearn_truncated_svd` - leverages sklearn [TruncatedSVD()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html) - great for handling sparse matrices (with lots of 0), that *are* type `scipy.sparse` (`X.sp_issparse` is True).
 
+### Table of contents
+* [Refresher on Dimension Reduction](#refresher-dimred)
+* [DimRed Installation](#dimred-installation)
+* [Dimred Examples](#dimred-examples)
+* [Dimension Reduction Notebooks](#dimred-notebooks)
+* [Dimension Reduction Algorithms - Intuition and Mathematics](#dimred-intuition)
+* [Resources](#resources)
 
-#### 1.1 Refresher on Dimension Reduction
+
+### 1. <a name="#refresher-dimred"></a> Refresher on Dimension Reduction
 **Dimension reduction** (or Dimensionality reduction) refers to techniques for reducing the number of input variables in training data.
 
 *When dealing with high dimensional data, it is often useful to reduce the dimensionality by projecting the data to a lower dimensional subspace which captures the “essence” of the data. This is called **dimensionality reduction**.*
@@ -32,14 +45,15 @@ It is **desirable to have simple models that generalize well**, and in turn, inp
 
 
 
-#### 1.2 Why is Dimension Reduction useful?
+#### Why is Dimension Reduction useful?
 - **Reduces training time** — due to smaller dataset
 - **Removes noise** — by keeping only what’s relevant
 - **Makes visualization possible** — in cases where you have a maximum of 3 principal components
 
 
 
-### 2. DimRed Installation
+
+### <a name="dimred-installation"></a> 2. DimRed Installation
 
 `DimRed` is currently built as a python package.
 It will be soon hosted in artifactory to be pip installable as well as in MLaaS to be available as a service.
@@ -86,7 +100,7 @@ Or:
 We should aim at having a minimum of 80% code coverage, and preferably closer or equal to 100%.
 
 
-### 3. DimRed Examples
+### <a name="dimred-examples"></a> 3. DimRed Examples
 
 #### 3.1 DimRed on Iris dataset (automatic selection)
 Reducing the (150x4) iris matrix to (150x2) with `DimRed` letting the algorithm pick the right algorithm (in that case `sklearn_pca` which is the default algorithm):
@@ -183,11 +197,11 @@ X_pca.shape
 ```
 
 
-### 4. Dimension Reduction Notebooks
+### 4. <a name="#dimred-notebooks"></a> Dimension Reduction Notebooks
  - [PCA implementation with EVD and SVD](notebooks/pca_evd_svd.ipynb) => provides implementation of PCA with EVD and SVD and shows SVD is a better implementation
  - [PCA vs LDA and PCA visualization on Iris data](notebooks/pca_lda_iris.ipynb)
 
-### 5. Dimension Reduction - Additional info
+### 5. <a name="#dimred-intuition"></a> Dimension Reduction Algorithms - Intuition and Mathematics
 
 #### 5.1 Dimensionality Reduction Algorithms
 
@@ -397,7 +411,7 @@ Consider the eigendecomposition `𝐴=𝑃𝐷𝑃−1` and SVD `𝐴=𝑈Σ𝑉
 using the SVD to perform PCA makes much better sense numerically than forming the covariance matrix (in EVD) to begin with, since the formation of 𝐗𝐗⊤ can cause loss of precision
 
 
-### 6. Resources
+### 6. <a name="#resources"></a> Resources
 #### Articles
  - [scikit learn PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
  - [MIT open source pca packate](https://github.com/erdogant/pca)
