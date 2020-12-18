@@ -2,7 +2,8 @@
 
 
 ### DimRed Introduction
-<img align="left" src="images/DimRed_Logo_s.jpg" width="170" height="100" style="vertical-align:left;margin:0px 10px">
+<img align="left" src="images/Dimred_s3.png" style="vertical-align:left;margin:0px 10px">
+<!--img align="left" src="images/DimRed_Logo_s.jpg" width="170" height="100" style="vertical-align:left;margin:0px 10px"-->
 
 **DimRed** is a python package that enables **Dimension Reduction** leveraging various algorithms with the default being
   **PCA** (Principal Component Analysis).
@@ -23,13 +24,13 @@ It offers several functions, some built-in, some others acting as "pass through"
 ### Table of contents
 * [Refresher on Dimension Reduction](#refresher-dimred)
 * [DimRed Installation](#dimred-installation)
-* [Dimred Examples](#dimred-examples)
+* [DimRed Examples](#dimred-examples)
 * [Dimension Reduction Notebooks](#dimred-notebooks)
 * [Dimension Reduction Algorithms - Intuition and Mathematics](#dimred-intuition)
 * [Resources](#resources)
 
 
-### 1. <a name="#refresher-dimred"></a> Refresher on Dimension Reduction
+### <a name="refresher-dimred"></a> 1. Refresher on Dimension Reduction
 **Dimension reduction** (or Dimensionality reduction) refers to techniques for reducing the number of input variables in training data.
 
 *When dealing with high dimensional data, it is often useful to reduce the dimensionality by projecting the data to a lower dimensional subspace which captures the “essence” of the data. This is called **dimensionality reduction**.*
@@ -197,11 +198,11 @@ X_pca.shape
 ```
 
 
-### 4. <a name="#dimred-notebooks"></a> Dimension Reduction Notebooks
+### <a name="dimred-notebooks"></a> 4. Dimension Reduction Notebooks
  - [PCA implementation with EVD and SVD](notebooks/pca_evd_svd.ipynb) => provides implementation of PCA with EVD and SVD and shows SVD is a better implementation
  - [PCA vs LDA and PCA visualization on Iris data](notebooks/pca_lda_iris.ipynb)
 
-### 5. <a name="#dimred-intuition"></a> Dimension Reduction Algorithms - Intuition and Mathematics
+### <a name="dimred-intuition"></a> 5. Dimension Reduction Algorithms - Intuition and Mathematics
 
 #### 5.1 Dimensionality Reduction Algorithms
 
@@ -411,7 +412,8 @@ Consider the eigendecomposition `𝐴=𝑃𝐷𝑃−1` and SVD `𝐴=𝑈Σ𝑉
 using the SVD to perform PCA makes much better sense numerically than forming the covariance matrix (in EVD) to begin with, since the formation of 𝐗𝐗⊤ can cause loss of precision
 
 
-### 6. <a name="#resources"></a> Resources
+### <a name="resources"></a> 6. Resources
+
 #### Articles
  - [scikit learn PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
  - [MIT open source pca packate](https://github.com/erdogant/pca)
