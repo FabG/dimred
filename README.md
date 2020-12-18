@@ -13,8 +13,8 @@ This package will also soon offer visualization capabilities.
 It offers several functions, some built-in, some others acting as "pass through" for existing scikit learn packages:
  - internally built SVD and EVD methods with `numpy`:
   - `dimred_svd` - Dimension reduction using the Singular Value Decomposition: `X . V = U . S ==> X = U.S.Vt`
-  This should return the same results as `sklearn_pca`
-  - `dimred_evd`- Dimension reduction using the Eigen Value Decomposition
+  This should return the same results as `sklearn_pca` and it uses `np.linalg.svd`
+  - `dimred_evd`- Dimension reduction using the Eigen Value Decomposition, based on `C` being the covariance matrix of X `C = XT x X / (n -1)` and `C = Q Λ QT` where `Λ` is a diagonal matrix with eigenvalues in decreasing order on the diagonal. It uses `np.linalg.eig`
  - "pass through" methods exposing `sklearn.decomposition` algorithms:
    - `sklearn_pca` - leverages sklearn [PCA()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) that is a Linear dimension reduction function that uses SVD.
    This should return the same results as numpy based internal implementation of SVD: `dimred_svd`

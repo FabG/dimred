@@ -220,9 +220,9 @@ class DimRed():
         U, Vt = svd_flip(U, Vt)
 
         # Postprocess the number of components required
-        X_transf = self._postprocess_dimred_pcasvd(U, Sigma, Vt)
+        X_transf = self._postprocess_dimred_pca_svd(U, Sigma, Vt)
 
-        # Return principal components and eigenvalues to calculate the portion of sample variance explained
+        # Return principal components
         return X_transf
 
 
@@ -235,11 +235,14 @@ class DimRed():
         X_cov = DimRed._cov(X_centered)
 
         # EVD
-        E_vals, E_vecs = DimRed._eigen_sorted(X_cov)
-        U = np.dot(X_centered, E_vecs)
+        eigen_vals_sorted, eigen_vecs_sorted = DimRed._eigen_sorted(X_cov)
 
-        # Return principal components and eigenvalues to calculate the portion of sample variance explained
-        return U, E_vals
+        # Postprocess the number of components required
+        X_transf = self._postprocess_dimred_pca_evd(X_centered, eigen_vals_sorted, eigen_vecs_sorted)
+
+        # Return principal components
+        return X_transf
+
 
 
     def _center(X):
@@ -309,12 +312,12 @@ class DimRed():
             sorted based on eigenvalue from high to low
         """
         # Compute the eigen values and vectors using numpy
-        eig_vals, eig_vecs = np.linalg.eig(X_cov)
+        eigen_vals, eigen_vecs = np.linalg.eig(X_cov)
 
         # Sort the eigenvalue and eigenvector from high to low
-        idx = eig_vals.argsort()[::-1]
+        idx = eigen_vals.argsort()[::-1]
 
-        return eig_vals[idx], eig_vecs[:, idx]
+        return eigen_vals[idx], eigen_vecs[:, idx]
 
 
     def _postprocess_sklearn_pca(self, X, pca):
@@ -422,14 +425,14 @@ class DimRed():
 
         return X
 
-    def _postprocess_dimred_pcasvd(self, U, Sigma, Vt):
+    def _postprocess_dimred_pca_svd(self, U, Sigma, Vt):
         """
         Postprocessing for PCA SVD
         """
         n_samples, n_features = U.shape
 
         if self.n_components is None:
-            self.n_components = X.shape[1] - 1
+            self.n_components = n_features - 1
 
         components_ = Vt
 
@@ -459,8 +462,30 @@ class DimRed():
             explained_variance_ratio_[:n_components]
         self.singular_values_ = singular_values_[:n_components]
 
-        X_transf = np.empty([U.shape[0], self.n_components_])
+        X_transf = np.empty([n_samples, self.n_components_])
         X_transf[:] = U[:, :self.n_components_]
         X_transf *= Sigma[:self.n_components_]
+
+        return X_transf
+
+
+    def _postprocess_dimred_pca_evd(self, X_centered, eigen_vals_sorted, eigen_vecs_sorted):
+        """
+        Postprocessing for PCA EVD
+        """
+        n_samples, n_features = X_centered.shape
+
+        if self.n_components is None:
+            self.n_components = n_features - 1
+
+        # converting n_components ratio to an integer based on variance
+        if 0 < self.n_components < 1.0:
+            # TO BE IMPLEMENTED.... for now using default
+            self.n_components = n_features - 1
+
+        n_components = self.n_components
+
+        X_transf = np.dot(X_centered, eigen_vecs_sorted)
+        X_transf = X_transf[:n_components]
 
         return X_transf
