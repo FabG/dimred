@@ -352,7 +352,7 @@ def test_dimred_evd():
     e_vecs_ref = np.array([[-0.83234965, -0.50163583, -0.23570226],
                             [-0.45180545,  0.86041634, -0.23570226],
                             [-0.32103877,  0.08969513,  0.94280904]])
-    X_vecs_pca_ref = np.array([[ 1.21681246e+00,  6.38949394e-01,  3.34638699e-16],
+    X_vecs_pca_ref2 = np.array([[ 1.21681246e+00,  6.38949394e-01,  3.34638699e-16],
                                 [ 8.36268258e-01, -7.23102775e-01,  1.68105246e-16]])
     X_vecs_pca_ref1 = np.array([1.21681246e+00, 6.38949394e-01, 3.34638699e-16])
 
@@ -371,19 +371,22 @@ def test_dimred_evd():
     e_vals, e_vecs = eig_vals[idx], eig_vecs[:, idx]
 
     X_vecs = X_centered.dot(e_vecs)
-    X_vecs_pca = X_vecs[:n_features-1]  # default is to reduce the dimensions by 1
+    X_vecs_pca = X_vecs[:n_features-1]
 
     dimred = DimRed(algo='dimred_evd')
     dimred1 = DimRed(algo='dimred_evd', n_components=1)
+    dimred2 = DimRed(algo='dimred_evd', n_components=2)
     X_transf = dimred.fit_transform(X)
     X_transf1 = dimred1.fit_transform(X)
+    X_transf2 = dimred2.fit_transform(X)
 
     assert(np.allclose(e_vals, e_vals_ref))  # avoiding rounding float errors
     assert(np.allclose(e_vecs, e_vecs_ref))  # avoiding rounding float errors
     assert(np.allclose(X_vecs, X_vecs_ref))  # avoiding rounding float errors
-    assert(np.allclose(X_vecs_pca, X_vecs_pca_ref))  # avoiding rounding float errors
-    #assert(np.allclose(X_transf, X_vecs_pca_ref))  # avoiding rounding float errors
-    #assert(np.allclose(X_transf1, X_vecs_pca_ref1))  # avoiding rounding float errors
+    assert(np.allclose(X_vecs_pca, X_vecs_pca_ref2))  # avoiding rounding float errors
+    assert(np.allclose(X_transf, X_vecs_pca_ref1))  # avoiding rounding float errors
+    assert(np.allclose(X_transf1, X_vecs_pca_ref1))  # avoiding rounding float errors
+    assert(np.allclose(X_transf2, X_vecs_pca_ref2))  # avoiding rounding float errors
 
 
 def test_dimred_svd():

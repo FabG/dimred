@@ -462,6 +462,7 @@ class DimRed():
             explained_variance_ratio_[:n_components]
         self.singular_values_ = singular_values_[:n_components]
 
+        # Project the data
         X_transf = np.empty([n_samples, self.n_components_])
         X_transf[:] = U[:, :self.n_components_]
         X_transf *= Sigma[:self.n_components_]
@@ -474,34 +475,23 @@ class DimRed():
         Postprocessing for PCA EVD
         """
         n_samples, n_features = X_centered.shape
-        print('TEST---- X_centered:{}'.format(X_centered))
-        print('TEST---- eigen_vecs_sorted:{}'.format(eigen_vecs_sorted))
-        print('TEST---- eigen_vals_sorted:{}'.format(eigen_vals_sorted))
 
         # Calculating the explained variance on each of components
         explained_variance_ = np.empty([1, n_features], dtype=float)
         for i in eigen_vals_sorted:
 
              np.append(explained_variance_, (i/sum(eigen_vals_sorted))*100)
-        print('TEST---- explained_variance_:{}'.format(explained_variance_))
 
         # Identifying components that explain at least 95%
         total_var = np.cumsum(explained_variance_)
-        print('TEST---- total_var:{}'.format(total_var))
-
         explained_variance_ratio_ = explained_variance_ / total_var
-        print('TEST---- explained_variance_ratio_:{}'.format(explained_variance_ratio_))
 
-        print('TEST---- self.n_components:{}'.format(self.n_components))
         n_components = self.n_components
         # converting n_components ratio to an integer based on variance
         if 0 < n_components < 1.0:
-            print('TEST---- self.n_components is a fraction')
             ratio_cumsum = stable_cumsum(explained_variance_ratio_)
             n_components = np.searchsorted(ratio_cumsum, self.n_components,
                                            side='right') + 1
-            print('TEST---- adjusting n_components to: {}'.format(n_components))
-
 
         self.components_ = eigen_vecs_sorted[:n_components]
         self.n_components_ = n_components
@@ -510,6 +500,7 @@ class DimRed():
             explained_variance_ratio_[:n_components]
         #self.noise_variance_ = explained_variance_[n_components:].mean()
 
+        # Project the data
         X_transf = np.dot(X_centered, eigen_vecs_sorted)
         X_transf = X_transf[:n_components]
 
