@@ -2,6 +2,7 @@ import os
 import numpy as np
 from numpy import count_nonzero
 import pandas as pd
+import matplotlib.pyplot as plt
 from dimred import DimRed
 from scipy.sparse import random as sparse_random
 from scipy.sparse import csr_matrix, isspmatrix
@@ -497,3 +498,16 @@ def test_truncated_svd():
     assert(X.shape == (100, 100))
     assert(X_transformed.shape == (100, 5))
     assert(X_transformed2.shape == (100, 5))
+
+def test_draw_scatterplot_iris_data():
+    print('\n[test_draw_scatterplot_iris_data]')
+    iris = load_iris()
+    features = iris.data.T
+    target = iris.target
+
+    plt.scatter(features[0], features[1], alpha=0.2,
+                s=100*features[3], c=target, cmap='viridis')
+    # sequential colors: 'viridis', 'plasma', 'inferno', 'magma', 'cividis'
+    plt.xlabel(iris.feature_names[0])
+    plt.ylabel(iris.feature_names[1])
+    #plt.show()  - that would launch the rendered image in a separate window and be a blocking call for the tests
