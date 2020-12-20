@@ -14,10 +14,12 @@ import scipy.sparse as sp
 from scipy.sparse import csr_matrix, isspmatrix
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn.decomposition import PCA, SparsePCA, TruncatedSVD
+import matplotlib.pyplot as plt
 
 SPARSITY = 0.6      # define the %sparsity of a matrix -  0.6 means 60% of values are 0
 N_COMPONENTS = 0.95 # default values for returning components using a variance of 95%
 DEFAULT_PCA_ALGO = 'sklearn_pca'
+DEFAULT_TITLE = 'DimRed Plot'
 
 class DimRed():
     """
@@ -80,6 +82,47 @@ class DimRed():
         """
         model = self._fit_transform(X)
         return (model)
+
+
+    def draw_scatterplot(self, PC=[0,1], title=DEFAULT_TITLE) :
+        """
+        Render X as a scatter 2d plot
+
+
+        Parameters
+        ----------
+        PC : list, default : [0,1]
+            Plot the first two Principal Components. Note that counting starts from 0. PC1=0, PC2=1, PC3=2, etc
+
+        Returns
+        -------
+        tuple containing (fig, ax)
+
+        """
+        # Colormap - uwing `Qualitative` as it changes rapidly
+        # see maptplotlib.pyplot cmaps for more info
+        #color_list = plt.cm.Set3(np.linspace(0, 1, 12))
+
+        data = np.random.random([100, 100]) * 10
+        x = np.random.rand(100)
+        y = np.random.rand(100)
+        t = np.arange(100)
+
+        fig = plt.figure()
+        plt.scatter(x, y, c=t, cmap='Qualitative')
+        plt.show()
+
+        colors = ['navy', 'turquoise', 'darkorange']
+        lw = 2
+        for color, i, target_name in zip(colors, [0, 1, 2], target_names):
+            plt.scatter(X_pca[y == i, 0],
+                        X_pca[y == i, 1],
+                        color=color, alpha=.8, lw=lw,
+                        label=target_name)
+        plt.legend(loc='best', shadow=False, scatterpoints=1)
+        plt.title(title)
+        return fig
+
 
 
     def _fit_transform(self, X):
