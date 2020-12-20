@@ -445,6 +445,8 @@ using the SVD to perform PCA makes much better sense numerically than forming th
  - [Dimension reduction algorithms in python](https://machinelearningmastery.com/dimensionality-reduction-algorithms-with-python/)
  - [PCA explained on wine data with chart animation](https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues/140579#140579)
  - [Dimensionality Reduction with PCA and t-SNE in R](https://medium.com/@TheDataGyan/dimensionality-reduction-with-pca-and-t-sne-in-r-2715683819)
+ - [What are Eigenvalues and eigenvectors](https://medium.com/fintechexplained/what-are-eigenvalues-and-eigenvectors-a-must-know-concept-for-machine-learning-80d0fd330e47)
+ - [PCA with numpy](https://towardsdatascience.com/pca-with-numpy-58917c1d0391)
 
 
 #### DataSets (for Unit Tests)
