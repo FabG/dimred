@@ -84,15 +84,20 @@ class DimRed():
         return (model)
 
 
-    def draw_scatterplot(self, PC=[0,1], title=DEFAULT_TITLE) :
+    def draw_scatterplot(self, X, y=None, PC=2, title=DEFAULT_TITLE, figsize=(10, 8)) :
         """
-        Render X as a scatter 2d plot
+        Render X as a scatter 2d plot with 2 or 3 components
 
 
         Parameters
         ----------
-        PC : list, default : [0,1]
-            Plot the first two Principal Components. Note that counting starts from 0. PC1=0, PC2=1, PC3=2, etc
+        X : array-like of shape (n_samples, n_components) to be plotted
+        X : array-like of shape (n_samples) to be plotted - labels
+        PC : int, default : 2
+            Plot the Principal Components, default 2. This also accepts 3
+            If 3 is selected, the 3rd component will be used as size of the bubbles
+        figsize : 2-tuple of floats (float, float), optional, default: (10,8)
+            Figure dimension (width, height) in inches.
 
         Returns
         -------
@@ -103,25 +108,18 @@ class DimRed():
         # see maptplotlib.pyplot cmaps for more info
         #color_list = plt.cm.Set3(np.linspace(0, 1, 12))
 
-        data = np.random.random([100, 100]) * 10
-        x = np.random.rand(100)
-        y = np.random.rand(100)
-        t = np.arange(100)
+        fig, ax = plt.subplots(figsize=figsize, edgecolor='k')
+        if PC not in (2,3,4):
+            raise ValueError("[DimRed] - PC needs to be 2, 3 or 4 to be plotted")
+        if PC == 2:
+            plt.scatter(X[0], X[1], alpha=0.5, cmap='viridis')
+            ax.set_xlabel('Principal Component 1')
+            ax.set_ylabel('Principal Component 2')
+        if PC == 3:
+            plt.scatter(X[0], X[1], X[2], alpha=0.5, cmap='viridis')
 
-        fig = plt.figure()
-        plt.scatter(x, y, c=t, cmap='Qualitative')
-        plt.show()
-
-        colors = ['navy', 'turquoise', 'darkorange']
-        lw = 2
-        for color, i, target_name in zip(colors, [0, 1, 2], target_names):
-            plt.scatter(X_pca[y == i, 0],
-                        X_pca[y == i, 1],
-                        color=color, alpha=.8, lw=lw,
-                        label=target_name)
-        plt.legend(loc='best', shadow=False, scatterpoints=1)
-        plt.title(title)
-        return fig
+        fig.tight_layout()
+        return fig, ax
 
 
 

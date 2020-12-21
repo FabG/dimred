@@ -499,15 +499,28 @@ def test_truncated_svd():
     assert(X_transformed.shape == (100, 5))
     assert(X_transformed2.shape == (100, 5))
 
+
 def test_draw_scatterplot_iris_data():
     print('\n[test_draw_scatterplot_iris_data]')
     iris = load_iris()
     features = iris.data.T
     target = iris.target
 
-    plt.scatter(features[0], features[1], alpha=0.2,
+    fig, ax = plt.subplots()
+    fig.suptitle('Unit Test - Original Iris Dataset')
+    ax.scatter(features[0], features[1], alpha=0.5,
                 s=100*features[3], c=target, cmap='viridis')
-    # sequential colors: 'viridis', 'plasma', 'inferno', 'magma', 'cividis'
-    plt.xlabel(iris.feature_names[0])
-    plt.ylabel(iris.feature_names[1])
-    #plt.show()  - that would launch the rendered image in a separate window and be a blocking call for the tests
+    ax.set_xlabel(iris.feature_names[0])
+    ax.set_ylabel(iris.feature_names[1])
+    fig.tight_layout()
+    plt.show()
+
+def test_draw_scatterplot():
+    print('\n[test_draw_scatterplot]')
+    iris = load_iris()
+    features = iris.data.T
+    target = iris.target
+
+    dimred = DimRed()
+    fig, ax = dimred.draw_scatterplot(features, target, PC=2, title='Iris Dataset')
+    plt.show()
