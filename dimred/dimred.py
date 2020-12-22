@@ -20,6 +20,7 @@ SPARSITY = 0.6      # define the %sparsity of a matrix -  0.6 means 60% of value
 N_COMPONENTS = 0.95 # default values for returning components using a variance of 95%
 DEFAULT_PCA_ALGO = 'sklearn_pca'
 DEFAULT_TITLE = 'DimRed Plot'
+DEFAULT_FIG_SIZE=(8, 6)
 
 class DimRed():
     """
@@ -84,7 +85,7 @@ class DimRed():
         return (model)
 
 
-    def draw_scatterplot(self, X, y=None, PC=2, title=DEFAULT_TITLE, figsize=(10, 8)) :
+    def draw_scatterplot(self, X, y=None, PC=2, title=DEFAULT_TITLE, figsize=DEFAULT_FIG_SIZE) :
         """
         Render X as a scatter 2d plot with 2 or 3 components
 
@@ -112,13 +113,13 @@ class DimRed():
         if PC not in (2,3,4):
             raise ValueError("[DimRed] - PC needs to be 2, 3 or 4 to be plotted")
         if PC == 2:
-            plt.scatter(X[0], X[1], alpha=0.5, c=y, cmap='viridis')
+            plt.scatter(X[:,0], X[:,1], alpha=0.4, c=y, cmap='viridis')
             ax.set_title(title)
             ax.set_xlabel('Principal Component 1')
             ax.set_ylabel('Principal Component 2')
         if PC == 3:
             # used the 3rd PC as size of the plot 's'
-            plt.scatter(X[0], X[1], s=100*X[2], c=y, alpha=0.5, cmap='viridis')
+            plt.scatter(X[:,0], X[:,1], s=100*X[:,2], c=y, alpha=0.4, cmap='viridis')
             ax.set_title(title)
             ax.set_xlabel('Principal Component 1')
             ax.set_ylabel('Principal Component 2')
