@@ -112,12 +112,16 @@ class DimRed():
         if PC not in (2,3,4):
             raise ValueError("[DimRed] - PC needs to be 2, 3 or 4 to be plotted")
         if PC == 2:
-            plt.scatter(X[0], X[1], alpha=0.5, cmap='viridis')
+            plt.scatter(X[0], X[1], alpha=0.5, c=y, cmap='viridis')
+            ax.set_title(title)
             ax.set_xlabel('Principal Component 1')
             ax.set_ylabel('Principal Component 2')
         if PC == 3:
-            plt.scatter(X[0], X[1], X[2], alpha=0.5, cmap='viridis')
-
+            # used the 3rd PC as size of the plot 's'
+            plt.scatter(X[0], X[1], s=100*X[2], c=y, alpha=0.5, cmap='viridis')
+            ax.set_title(title)
+            ax.set_xlabel('Principal Component 1')
+            ax.set_ylabel('Principal Component 2')
         fig.tight_layout()
         return fig, ax
 

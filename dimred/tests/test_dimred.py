@@ -515,12 +515,36 @@ def test_draw_scatterplot_iris_data():
     fig.tight_layout()
     plt.show()
 
-def test_draw_scatterplot():
-    print('\n[test_draw_scatterplot]')
+
+def test_draw_scatterplot_2dim():
+    print('\n[test_draw_scatterplot_2dim]')
     iris = load_iris()
     features = iris.data.T
     target = iris.target
 
     dimred = DimRed()
     fig, ax = dimred.draw_scatterplot(features, target, PC=2, title='Iris Dataset')
+    plt.show()
+
+
+def test_draw_scatterplot_3dim():
+    print('\n[test_draw_scatterplot_3dim]')
+    iris = load_iris()
+    features = iris.data.T
+    target = iris.target
+
+    dimred = DimRed()
+    fig, ax = dimred.draw_scatterplot(features, target, PC=3, title='Iris Dataset')
+    plt.show()
+
+def test_draw_scatterplot2():
+    print('\n[test_draw_scatterplot2]')
+    # Plot Reduced data with 2 components
+    iris = load_iris()
+    X = iris.data
+
+    dimred = DimRed(algo='dimred_svd', n_components=2)
+    X_transf = dimred.fit_transform(X)
+
+    fig, ax = dimred.draw_scatterplot(X_transf, PC=2, title='Reduced Iris Dataset', figsize=(12,8))
     plt.show()
