@@ -11,6 +11,8 @@ from sklearn.decomposition import TruncatedSVD, SparsePCA
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn.preprocessing import StandardScaler
 
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # Set up absolute path to unit test files
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -500,42 +502,42 @@ def test_truncated_svd():
     assert(X_transformed2.shape == (100, 5))
 
 
-def test_draw_scatterplot_iris_data():
-    print('\n[test_draw_scatterplot_iris_data]')
-    iris = load_iris()
-    features = iris.data  # shape (150,4)
-    target = iris.target  # shape (150,1)
-
-    fig, ax = plt.subplots()
-    fig.suptitle('Unit Test - Original Iris Dataset')
-    ax.scatter(features[:,0], features[:,1], alpha=0.4,
-                s=100*features[:,3], c=target, cmap='viridis')
-    ax.set_xlabel(iris.feature_names[0])
-    ax.set_ylabel(iris.feature_names[1])
-    fig.tight_layout()
-    plt.show()
-
-
-def test_draw_scatterplot_2dim_iris():
-    print('\n[test_draw_scatterplot_2dim_iris]')
-    iris = load_iris()
-    features = iris.data
-    target = iris.target
-
-    dimred = DimRed()
-    fig, ax = dimred.draw_scatterplot(features, target, PC=2, title='Iris Dataset')
-    plt.show()
-
-
-def test_draw_scatterplot_3dim_iris():
-    print('\n[test_draw_scatterplot_3dim_iris]')
-    iris = load_iris()
-    features = iris.data
-    target = iris.target
-
-    dimred = DimRed()
-    fig, ax = dimred.draw_scatterplot(features, target, PC=3, title='Iris Dataset', figsize=(12,8))
-    plt.show()
+# def test_draw_scatterplot_iris_data():
+#     print('\n[test_draw_scatterplot_iris_data]')
+#     iris = load_iris()
+#     features = iris.data  # shape (150,4)
+#     target = iris.target  # shape (150,1)
+#
+#     fig, ax = plt.subplots()
+#     fig.suptitle('Unit Test - Original Iris Dataset')
+#     ax.scatter(features[:,0], features[:,1], alpha=0.4,
+#                 s=100*features[:,3], c=target, cmap='viridis')
+#     ax.set_xlabel(iris.feature_names[0])
+#     ax.set_ylabel(iris.feature_names[1])
+#     fig.tight_layout()
+#     plt.show()
+#
+#
+# def test_draw_scatterplot_2dim_iris():
+#     print('\n[test_draw_scatterplot_2dim_iris]')
+#     iris = load_iris()
+#     features = iris.data
+#     target = iris.target
+#
+#     dimred = DimRed()
+#     fig, ax = dimred.draw_scatterplot(features, target, PC=2, title='Iris Dataset plotted with DimRed (2 features)')
+#     plt.show()
+#
+#
+# def test_draw_scatterplot_3dim_iris():
+#     print('\n[test_draw_scatterplot_3dim_iris]')
+#     iris = load_iris()
+#     features = iris.data
+#     target = iris.target
+#
+#     dimred = DimRed()
+#     fig, ax = dimred.draw_scatterplot(features, target, PC=3, title='Iris Dataset plotted with DimRed (3 features)', figsize=(10,6))
+#     plt.show()
 
 def test_draw_scatterplot_2dim_iris_reduced_data():
     print('\n[test_draw_scatterplot_2dim_iris_reduced_data]')
@@ -547,7 +549,7 @@ def test_draw_scatterplot_2dim_iris_reduced_data():
     dimred = DimRed(algo='dimred_svd', n_components=2)
     X_transf = dimred.fit_transform(X)
 
-    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2, title='Reduced Iris Dataset - 2 dimensions')
+    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2, title='Reduced Iris Dataset with DimRed - 2 principal components', legend=True)
     plt.show()
 
 
@@ -561,5 +563,5 @@ def test_draw_scatterplot_3dim_iris_reduced_data():
     dimred = DimRed(algo='dimred_svd', n_components=3)
     X_transf = dimred.fit_transform(X)
 
-    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3, title='Reduced Iris Dataset - 3 dimensions')
+    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3, title='Reduced Iris Dataset with DimRed - 3 principal components', legend=True)
     plt.show()

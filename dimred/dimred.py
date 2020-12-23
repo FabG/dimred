@@ -85,7 +85,7 @@ class DimRed():
         return (model)
 
 
-    def draw_scatterplot(self, X, y=None, PC=2, title=DEFAULT_TITLE, figsize=DEFAULT_FIG_SIZE) :
+    def draw_scatterplot(self, X, y=None, PC=2, title=DEFAULT_TITLE, figsize=DEFAULT_FIG_SIZE, legend=False) :
         """
         Render X as a scatter 2d plot with 2 or 3 components
 
@@ -93,12 +93,16 @@ class DimRed():
         Parameters
         ----------
         X : array-like of shape (n_samples, n_components) to be plotted
-        X : array-like of shape (n_samples) to be plotted - labels
+        y : array-like of shape (n_samples) to be plotted - labels
         PC : int, default : 2
             Plot the Principal Components, default 2. This also accepts 3
             If 3 is selected, the 3rd component will be used as size of the bubbles
+        title : string, default : 'DimRed Plot'
+            Adds a title to the chart. Pass empty '' if you prefer no title
         figsize : 2-tuple of floats (float, float), optional, default: (10,8)
             Figure dimension (width, height) in inches.
+        legend : boolean, default : False
+            Displays a legend if set to True
 
         Returns
         -------
@@ -113,16 +117,31 @@ class DimRed():
         if PC not in (2,3,4):
             raise ValueError("[DimRed] - PC needs to be 2, 3 or 4 to be plotted")
         if PC == 2:
-            plt.scatter(X[:,0], X[:,1], alpha=0.4, c=y, cmap='viridis')
+            scatter = plt.scatter(X[:,0], X[:,1], alpha=0.4, c=y, cmap='viridis')
             ax.set_title(title)
             ax.set_xlabel('Principal Component 1')
             ax.set_ylabel('Principal Component 2')
+            if legend:
+                # produce a legend with the unique colors from the scatter
+                legend1 = ax.legend(*scatter.legend_elements(),
+                loc="lower left", title="Classes")
+                ax.add_artist(legend1)
+
         if PC == 3:
             # used the 3rd PC as size of the plot 's'
-            plt.scatter(X[:,0], X[:,1], s=100*X[:,2], c=y, alpha=0.4, cmap='viridis')
+            scatter = plt.scatter(X[:,0], X[:,1], s=100*X[:,2], c=y, alpha=0.4, cmap='viridis')
             ax.set_title(title)
             ax.set_xlabel('Principal Component 1')
             ax.set_ylabel('Principal Component 2')
+            if legend:
+                # produce a legend with the unique colors from the scatter
+                legend1 = ax.legend(*scatter.legend_elements(),
+                loc="lower left", title="Classes")
+                ax.add_artist(legend1)
+                # produce a legend with a cross section of sizes from the scatter
+                handles, labels = scatter.legend_elements(prop="sizes", alpha=0.6)
+                legend2 = ax.legend(handles, labels, loc="upper right", title="Sizes")
+
         fig.tight_layout()
         return fig, ax
 
