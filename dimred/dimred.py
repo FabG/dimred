@@ -114,13 +114,15 @@ class DimRed():
         #color_list = plt.cm.Set3(np.linspace(0, 1, 12))
 
         fig, ax = plt.subplots(figsize=figsize, edgecolor='k')
+        (axis_title_0, axis_title_1, axis_title_2) = self._get_variance_axis()
+
         if PC not in (2,3,4):
             raise ValueError("[DimRed] - PC needs to be 2, 3 or 4 to be plotted")
         if PC == 2:
             scatter = plt.scatter(X[:,0], X[:,1], alpha=0.4, c=y, cmap='viridis')
             ax.set_title(title)
-            ax.set_xlabel('Principal Component 1')
-            ax.set_ylabel('Principal Component 2')
+            ax.set_xlabel('PC1'+ axis_title_0)
+            ax.set_ylabel('PC2'+ axis_title_1)
             if legend:
                 # produce a legend with the unique colors from the scatter
                 legend1 = ax.legend(*scatter.legend_elements(),
@@ -131,8 +133,8 @@ class DimRed():
             # used the 3rd PC as size of the plot 's'
             scatter = plt.scatter(X[:,0], X[:,1], s=100*X[:,2], c=y, alpha=0.4, cmap='viridis')
             ax.set_title(title)
-            ax.set_xlabel('Principal Component 1')
-            ax.set_ylabel('Principal Component 2')
+            ax.set_xlabel('PC1' + axis_title_0)
+            ax.set_ylabel('PC2' + axis_title_1)
             if legend:
                 # produce a legend with the unique colors from the scatter
                 legend1 = ax.legend(*scatter.legend_elements(),
@@ -145,6 +147,22 @@ class DimRed():
         fig.tight_layout()
         return fig, ax
 
+
+    def _get_variance_axis(self):
+        """
+        return 1 to 3 strings based on variance for scatter plot axis titles
+        """
+        axis_title_0 = ''
+        axis_title_1 = ''
+        axis_title_2 = ''
+        if len(self.explained_variance_ratio_) > 0:
+            axis_title_0 = ' (' + str(self.explained_variance_ratio_[0]*100)[0:4] + '% expl. var)'
+        if len(self.explained_variance_ratio_) > 1:
+            axis_title_1 = ' (' + str(self.explained_variance_ratio_[1]*100)[0:4] + '% expl. var)'
+        if len(self.explained_variance_ratio_) > 2:
+            axis_title_2 = '(' + str(self.explained_variance_ratio_[2]*100)[0:4] + '% expl. var)'
+
+        return (axis_title_0, axis_title_1, axis_title_2)
 
 
     def _fit_transform(self, X):
@@ -301,9 +319,12 @@ class DimRed():
 
         # EVD
         eigen_vals_sorted, eigen_vecs_sorted = DimRed._eigen_sorted(X_cov)
+        print('TEST  ---- _dimred_evd: eigen_vals_sorted: {}'.format(eigen_vals_sorted))
+        print('TEST  ---- _dimred_evd: eigen_vecs_sorted: {}'.format(eigen_vecs_sorted))
 
         # Postprocess the number of components required
         X_transf = self._postprocess_dimred_pca_evd(X_centered, eigen_vals_sorted, eigen_vecs_sorted)
+        print('TEST  ---- _dimred_evd: X_transf.shape: {}'.format(X_transf.shape))
 
         # Return principal components
         return X_transf
@@ -542,7 +563,7 @@ class DimRed():
         n_samples, n_features = X_centered.shape
 
         # Calculating the explained variance on each of components
-        explained_variance_ = np.empty([1, n_features], dtype=float)
+        explained_variance_ = np.empty([n_features], dtype=float)
         for i in eigen_vals_sorted:
 
              np.append(explained_variance_, (i/sum(eigen_vals_sorted))*100)
@@ -561,12 +582,10 @@ class DimRed():
         self.components_ = eigen_vecs_sorted[:n_components]
         self.n_components_ = n_components
         self.explained_variance_ = explained_variance_
-        self.explained_variance_ratio_ = \
-            explained_variance_ratio_[:n_components]
-        #self.noise_variance_ = explained_variance_[n_components:].mean()
+        self.explained_variance_ratio_ = explained_variance_ratio_[:n_components]
+        self.noise_variance_ = explained_variance_[n_components:].mean()
 
         # Project the data
         X_transf = np.dot(X_centered, eigen_vecs_sorted)
-        X_transf = X_transf[:n_components]
 
         return X_transf
