@@ -346,7 +346,7 @@ def test_eigen_sorted():
 
 
 def test_dimred_evd():
-    print('\n[test_evd]')
+    print('\n[test_dimred_evd]')
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_vecs_ref = np.array([[ 1.21681246e+00,  6.38949394e-01,  3.34638699e-16],
                             [ 8.36268258e-01, -7.23102775e-01,  1.68105246e-16],
@@ -355,12 +355,15 @@ def test_dimred_evd():
     e_vecs_ref = np.array([[-0.83234965, -0.50163583, -0.23570226],
                             [-0.45180545,  0.86041634, -0.23570226],
                             [-0.32103877,  0.08969513,  0.94280904]])
-    X_vecs_pca_ref2 = np.array([[ 1.21681246e+00,  6.38949394e-01,  3.34638699e-16],
-                                [ 8.36268258e-01, -7.23102775e-01,  1.68105246e-16]])
-    X_vecs_pca_ref1 = np.array([1.21681246e+00, 6.38949394e-01, 3.34638699e-16])
-
-
-    dimred = DimRed()  #0.95 default
+    X_vecs_pca_ref3 = np.array([[ 1.21681246e+00,  6.38949394e-01,  3.34638699e-16],
+                               [ 8.36268258e-01, -7.23102775e-01,  1.68105246e-16],
+                               [-2.05308072e+00,  8.41533816e-02,  2.79127548e-16]])
+    X_vecs_pca_ref2 = np.array([[ 1.21681246,  0.63894939],
+                               [ 0.83626826, -0.72310278],
+                               [-2.05308072,  0.08415338]])
+    X_vecs_pca_ref1 = np.array([[ 1.21681246],
+                               [ 0.83626826],
+                               [-2.05308072]])
 
     # Covariance (implemented by _cov())
     n_samples, n_features = X.shape
@@ -370,26 +373,33 @@ def test_dimred_evd():
 
     # Eigen values (implemented by _eigen_sorted)
     eig_vals, eig_vecs = np.linalg.eig(X_cov)
-    idx = eig_vals.argsort()[::-1]
+    idx = eig_vals.argsort()[::-1]    # idx= array([0, 1, 2])
     e_vals, e_vecs = eig_vals[idx], eig_vecs[:, idx]
 
     X_vecs = X_centered.dot(e_vecs)
-    X_vecs_pca = X_vecs[:n_features-1]
+    X_vecs_pca_1 = X_vecs[:, :1] # keep 1 component
+    X_vecs_pca_2 = X_vecs[:, :2] # keep 2 components
+    X_vecs_pca_3 = X_vecs[:, :3] # keep 3 components
 
     dimred = DimRed(algo='dimred_evd')
     dimred1 = DimRed(algo='dimred_evd', n_components=1)
     dimred2 = DimRed(algo='dimred_evd', n_components=2)
+    dimred3 = DimRed(algo='dimred_evd', n_components=3)
     X_transf = dimred.fit_transform(X)
     X_transf1 = dimred1.fit_transform(X)
     X_transf2 = dimred2.fit_transform(X)
+    X_transf3 = dimred3.fit_transform(X)
 
     assert(np.allclose(e_vals, e_vals_ref))  # avoiding rounding float errors
     assert(np.allclose(e_vecs, e_vecs_ref))  # avoiding rounding float errors
     assert(np.allclose(X_vecs, X_vecs_ref))  # avoiding rounding float errors
-    assert(np.allclose(X_vecs_pca, X_vecs_pca_ref2))  # avoiding rounding float errors
-    #assert(np.allclose(X_transf, X_vecs_pca_ref1))  # avoiding rounding float errors
-    #assert(np.allclose(X_transf1, X_vecs_pca_ref1))  # avoiding rounding float errors
-    #assert(np.allclose(X_transf2, X_vecs_pca_ref2))  # avoiding rounding float errors
+    assert(np.allclose(X_vecs_pca_1, X_vecs_pca_ref1))  # avoiding rounding float errors
+    assert(np.allclose(X_vecs_pca_2, X_vecs_pca_ref2))  # avoiding rounding float errors
+    assert(np.allclose(X_vecs_pca_3, X_vecs_pca_ref3))  # avoiding rounding float errors
+    assert(np.allclose(X_transf, X_vecs_pca_ref1))  # avoiding rounding float errors
+    assert(np.allclose(X_transf1, X_vecs_pca_ref1))  # avoiding rounding float errors
+    assert(np.allclose(X_transf2, X_vecs_pca_ref2))  # avoiding rounding float errors
+    assert(np.allclose(X_transf3, X_vecs_pca_ref3))  # avoiding rounding float errors
 
 
 def test_dimred_svd():

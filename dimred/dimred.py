@@ -586,6 +586,8 @@ class DimRed():
         self.noise_variance_ = explained_variance_[n_components:].mean()
 
         # Project the data
-        X_transf = np.dot(X_centered, eigen_vecs_sorted)
+        X_transf = np.empty([n_samples, self.n_components_])
+        X_proj = np.dot(X_centered, eigen_vecs_sorted)   # now of shape (n_samples, n_components)
+        X_transf[:] = X_proj[:, :self.n_components_]
 
         return X_transf
