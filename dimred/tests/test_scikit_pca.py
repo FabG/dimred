@@ -13,7 +13,6 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 #MY_DATA_PATH = os.path.join(THIS_DIR, os.pardir, 'data/data.csv')
 MY_DATA_PATH_MNIST = os.path.join(THIS_DIR, 'data/mnist_only_0_1.csv')
 MY_DATA_PATH_IRIS = os.path.join(THIS_DIR, 'data/iris_data.csv')
-print('MY_DATA_PATH_MNIST = {}'.format(MY_DATA_PATH_MNIST))
 
 def test_np_array():
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
@@ -22,9 +21,6 @@ def test_np_array():
 
     explained_variance_ratio = pca.explained_variance_ratio_
     singular_values = pca.singular_values_
-
-    print('\n[test_np_array] - Explained Variance ratio: {}'.format(explained_variance_ratio))
-    print('[test_np_array] - Singular Values: {}'.format(singular_values))
 
     assert(explained_variance_ratio[0] == 0.9924428900898052)
     assert(explained_variance_ratio[1] == 0.007557109910194766)
@@ -40,7 +36,6 @@ def test_np_array_sparse_noncsr():
     # calculate sparsity
     sparsity = 1.0 - count_nonzero(X_sparse) / X_sparse.size
     # The above array has 0.833 sparsity (meaning 83.3% of its values are 0)
-    print('\n[test_np_array_sparse_noncsr] - Checking no exception for sparsity of: {:.2f}'.format(sparsity))
 
     pca = PCA(n_components=1)
     try:
@@ -48,9 +43,6 @@ def test_np_array_sparse_noncsr():
         assert True
         explained_variance_ratio = pca.explained_variance_ratio_
         singular_values = pca.singular_values_
-
-        print('\n[test_np_array] - Explained Variance ratio: {}'.format(explained_variance_ratio))
-        print('[test_np_array] - Singular Values: {}'.format(singular_values))
 
         assert(explained_variance_ratio[0] == 0.6666666666666667)
         assert(singular_values[0] == 2.0000000000000004)
@@ -64,7 +56,6 @@ def test_np_array_sparse_csr():
     # calculate sparsity
     sparsity = 1.0 - count_nonzero(X_sparse_array) / X_sparse_array.size
     # The above array has 1.0 sparsity (meaning 100% of its values are 0)
-    print('\n[test_np_array_sparse_csr] - Checking compressed sparse exception for sparsity of: {:.2f}'.format(sparsity))
 
     pca = PCA(n_components=2)
     try:
@@ -85,9 +76,6 @@ def test_iris_data():
     explained_variance_ratio = pca.explained_variance_ratio_
     singular_values = pca.singular_values_
 
-    print('\n[test_iris_data] - Explained Variance ratio: {}'.format(explained_variance_ratio))
-    print('[test_iris_data] - Singular Values: {}'.format(singular_values))
-
     assert(explained_variance_ratio[0] == 0.9246187232017271)
     assert(explained_variance_ratio[1] == 0.05306648311706782)
     assert(singular_values[0] == 25.099960442183864)
@@ -107,9 +95,6 @@ def test_iris_data_transform():
     explained_variance_ratio = pca.explained_variance_ratio_
     singular_values = pca.singular_values_
 
-    print('\n[test_iris_data_transform] - Explained Variance ratio: {}'.format(explained_variance_ratio))
-    print('[test_iris_data_transform] - Singular Values: {}'.format(singular_values))
-
     assert(explained_variance_ratio[0] == 0.9246187232017271)
     assert(explained_variance_ratio[1] == 0.05306648311706782)
     assert(singular_values[0] == 25.099960442183864)
@@ -128,13 +113,10 @@ def test_mnist_data_pca():
     # Dimensionality: 784 (28 x 28 pixels images)
     # Features: integers calues from 0 to 255 (Pixel Grey color)
     mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)
-    #print('MNIST Dataset sample: {}'.format(mnist_df.head()))
 
     pixel_colnames = mnist_df.columns[:-1]
     X = mnist_df[pixel_colnames]
     y = mnist_df['label']
-    #print('X Dataset sample: {}'.format(X.head()))
-    #print('y Dataset sample: {}'.format(y.head()))
 
     # PCA is sensitive to the scale of the features.
     # We can standardize your data onto unit scale (mean = 0 and variance = 1) by using Scikit-Learn's StandardScaler.
@@ -146,8 +128,6 @@ def test_mnist_data_pca():
 
     mnist_dimensions_before_pca = len(pixel_colnames)
     mnist_dimensions_after_pca = pca.n_components_
-    print('\n[test_mnist_data] - Number of dimensions before PCA: ' + str(mnist_dimensions_before_pca))
-    print('[test_mnist_data] - Number of dimensions after PCA: ' + str(mnist_dimensions_after_pca))
 
     assert(mnist_dimensions_before_pca == 784)
     assert(mnist_dimensions_after_pca == 48)
@@ -166,7 +146,6 @@ def test_sparse_pca():
     assert(np.allclose(transformer.mean_, X.mean(axis=0)))
 
 def test_truncated_svd():
-    print('\n[test_truncated_svd]')
     X = sparse_random(100, 100, density=0.01, format='csr', random_state=42)
     explained_variance_ratio_ref = np.array([0.06461231, 0.06338995, 0.06394725, 0.05351761, 0.04064443])
     explained_variance_ratio_sum_ref = 0.28611154708177045

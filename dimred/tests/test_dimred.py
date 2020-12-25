@@ -21,7 +21,6 @@ MY_DATA_PATH_MNIST = os.path.join(THIS_DIR, 'data/mnist_only_0_1.csv')
 MY_DATA_PATH_IRIS = os.path.join(THIS_DIR, 'data/iris_data.csv')
 
 def test_init():
-    print('\n[test_init]')
     dimred = DimRed()
     dimred2 = DimRed(algo='dimred_svd')
     dimred3 = DimRed(algo='dimred_evd', n_components=3)
@@ -41,7 +40,6 @@ def test_init():
 
 
 def test_np_array_2_components():
-    print('\n[test_np_array_2_components')
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
     dimred = DimRed(n_components=2)
     X_pca = dimred.fit_transform(X)
@@ -56,7 +54,6 @@ def test_np_array_2_components():
 
 
 def test_np_array_default_components():
-    print('\n[test_np_array_default_components]')
     X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
     dimred = DimRed()  #0.95 default
     dimred2 = DimRed(n_components=0.40)
@@ -76,7 +73,6 @@ def test_np_array_default_components():
 
 
 def test_np_array_sparse_noncsr():
-    print('\n[test_np_array_sparse_noncsr]')
     # create sparse matrix
     X_sparse = np.array([[1,0,0,0,0,0], [0,0,2,0,0,0], [0,0,0,2,0,0]])
 
@@ -93,7 +89,6 @@ def test_np_array_sparse_noncsr():
 
 
 def test_np_array_sparse_csr():
-    print('\n[test_np_array_sparse_csr]')
     # create sparse matrix
     X_sparse = np.array([[1,0,0,0,0,0], [0,0,2,0,0,0], [0,0,0,2,0,0]])
     X_sparse_csr = csr_matrix(X_sparse)
@@ -108,7 +103,6 @@ def test_np_array_sparse_csr():
 
 
 def test_iris_data_sklearn_pca():
-    print('\n[test_iris_data_sklearn_pca]')
     iris = load_iris()
     X = iris.data
     y = iris.target
@@ -127,7 +121,6 @@ def test_iris_data_sklearn_pca():
 
 
 def test_iris_data_dimred_svd():
-    print('\n[test_iris_data_dimred_svd]')
     iris = load_iris()
     X = iris.data
     #y = iris.target
@@ -150,7 +143,6 @@ def test_iris_data_dimred_svd():
 
 
 def test_iris_data_sklearn_pca():
-    print('\n[test_iris_data_sklearn_pca]')
     iris = load_iris()
     X = iris.data
     y = iris.target
@@ -169,7 +161,6 @@ def test_iris_data_sklearn_pca():
 
 
 def test_iris_data_dimred_svd_equal_sklearn_pca():
-    print('\n[test_iris_data_dimred_svd_equal_sklearn_pca]')
     iris = load_iris()
     X = iris.data
 
@@ -199,7 +190,6 @@ def test_iris_data_dimred_svd_equal_sklearn_pca():
 
 
 def test_iris_data_dimred_svd_equal_sklearn_pca_1_comp():
-    print('\n[test_iris_data_dimred_svd_equal_sklearn_pca_1_comp]')
     iris = load_iris()
     X = iris.data
 
@@ -225,7 +215,6 @@ def test_iris_data_dimred_svd_equal_sklearn_pca_1_comp():
     assert(np.allclose(n_components_, n_components_sk_))
 
 def test_mnist_data_dimred_svd():
-    print('\n[test_mnist_data_dimred_svd]')
     # loading modified mnist dataset
     # It contains 2000 labeled images of each digit 0 and 1. Images are 28x28 pixels
     # Classes: 2 (digits 0 and 1)
@@ -256,7 +245,6 @@ def test_mnist_data_dimred_svd():
 
 
 def test_mnist_data_dimredsvd():
-    print('\n[test_mnist_data_dimredsvd]')
     mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)
 
     pixel_colnames = mnist_df.columns[:-1]
@@ -278,7 +266,6 @@ def test_mnist_data_dimredsvd():
 
 
 def test_center():
-    print('\n[test_center]')
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_center_ref = np.array([[-1.33333333, 0., -0.33333333],[-0.33333333, -1., -0.33333333],[1.66666667, 1., 0.66666667]])
     X_center = DimRed._center(X)
@@ -287,7 +274,6 @@ def test_center():
 
 
 def test_covariance():
-    print('\n[test_covariance]')
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
     X_cov = DimRed._cov(X)
@@ -296,7 +282,6 @@ def test_covariance():
 
 
 def test_preprocess():
-    print('\n[test_preprocess]')
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_center_ref = np.array([[-1.33333333, 0., -0.33333333],[-0.33333333, -1., -0.33333333],[1.66666667, 1., 0.66666667]])
 
@@ -308,7 +293,6 @@ def test_preprocess():
     assert(n_features == X.shape[1])
 
 def test_preprocess_feature_is_one():
-    print('\n[test_preprocess_feature_is_one]')
     X = np.array([[-1], [2]])
     dimred = DimRed()
 
@@ -320,7 +304,6 @@ def test_preprocess_feature_is_one():
 
 
 def test_preprocess_components_high():
-    print('\n[test_preprocess_components_high]')
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     HIGH_COMPONENTS = 5
 
@@ -331,7 +314,6 @@ def test_preprocess_components_high():
 
 
 def test_eigen_sorted():
-    print('\n[test_eigen_sorted]')
     X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
 
     X_eig_vecs_ref = np.array([[-0.83234965, -0.50163583, -0.23570226],
@@ -346,7 +328,6 @@ def test_eigen_sorted():
 
 
 def test_dimred_evd():
-    print('\n[test_dimred_evd]')
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     X_vecs_ref = np.array([[ 1.21681246e+00,  6.38949394e-01,  3.34638699e-16],
                             [ 8.36268258e-01, -7.23102775e-01,  1.68105246e-16],
@@ -403,7 +384,6 @@ def test_dimred_evd():
 
 
 def test_dimred_svd():
-    print('\n[test_dimred_svd]')
 
     X = np.array([[0, 3, 4], [1, 2, 4], [3, 4, 5]])
     U_ref = np.array([[-0.48117093, -0.65965234, 0.57735027],
@@ -423,7 +403,6 @@ def test_dimred_svd():
     # SVD - manual
     U, Sigma, Vt = np.linalg.svd(X_centered, full_matrices=False)
     U, Vt = svd_flip(U, Vt)
-    print(U)
 
     # flip eigenvectors' sign to enforce deterministic output
     X_transf = dimred._postprocess_dimred_pca_svd(U, Sigma, Vt)
@@ -441,7 +420,6 @@ def test_dimred_svd():
 
 
 def test_sparse_pca_forced():
-    print('\n[test_sparse_pca_forced]')
     X, _ = make_friedman1(n_samples=200, n_features=30, random_state=0)
 
     transformer = SparsePCA(n_components=5, random_state=0)
@@ -463,7 +441,6 @@ def test_sparse_pca_forced():
 
 
 def test_sparse_pca_auto():
-    print('\n[test_sparse_pca_auto]')
     X = make_sparse_spd_matrix(dim=30, alpha = .95, random_state=10)
 
     transformer = SparsePCA(n_components=5, random_state=0)
@@ -488,7 +465,6 @@ def test_sparse_pca_auto():
 
 
 def test_truncated_svd():
-    print('\n[test_truncated_svd]')
     X = sparse_random(100, 100, density=0.01, format='csr', random_state=42)
     explained_variance_ratio_ref = np.array([0.06461231, 0.06338995, 0.06394725, 0.05351761, 0.04064443])
     explained_variance_ratio_sum_ref = 0.28611154708177045
@@ -512,45 +488,7 @@ def test_truncated_svd():
     assert(X_transformed2.shape == (100, 5))
 
 
-# def test_draw_scatterplot_iris_data():
-#     print('\n[test_draw_scatterplot_iris_data]')
-#     iris = load_iris()
-#     features = iris.data  # shape (150,4)
-#     target = iris.target  # shape (150,1)
-#
-#     fig, ax = plt.subplots()
-#     fig.suptitle('Unit Test - Original Iris Dataset')
-#     ax.scatter(features[:,0], features[:,1], alpha=0.4,
-#                 s=100*features[:,3], c=target, cmap='viridis')
-#     ax.set_xlabel(iris.feature_names[0])
-#     ax.set_ylabel(iris.feature_names[1])
-#     fig.tight_layout()
-#     plt.show()
-#
-#
-# def test_draw_scatterplot_2dim_iris():
-#     print('\n[test_draw_scatterplot_2dim_iris]')
-#     iris = load_iris()
-#     features = iris.data
-#     target = iris.target
-#
-#     dimred = DimRed()
-#     fig, ax = dimred.draw_scatterplot(features, target, PC=2, title='Iris Dataset plotted with DimRed (2 features)')
-#     plt.show()
-#
-#
-# def test_draw_scatterplot_3dim_iris():
-#     print('\n[test_draw_scatterplot_3dim_iris]')
-#     iris = load_iris()
-#     features = iris.data
-#     target = iris.target
-#
-#     dimred = DimRed()
-#     fig, ax = dimred.draw_scatterplot(features, target, PC=3, title='Iris Dataset plotted with DimRed (3 features)', figsize=(10,6))
-#     plt.show()
-
 def test_draw_scatterplot_2dim_iris_reduced_data():
-    print('\n[test_draw_scatterplot_2dim_iris_reduced_data]')
     iris = load_iris()
     X = iris.data
     y = iris.target
@@ -563,7 +501,6 @@ def test_draw_scatterplot_2dim_iris_reduced_data():
 
 
 def test_draw_scatterplot_3dim_iris_reduced_data():
-    print('\n[test_draw_scatterplot_3dim_iris_reduced_data]')
     iris = load_iris()
     X = iris.data
     y = iris.target
@@ -575,25 +512,21 @@ def test_draw_scatterplot_3dim_iris_reduced_data():
     plt.show()
 
 def test_draw_scatterplot_2dim_iris_reduced_data_evd():
-    print('\n[test_draw_scatterplot_2dim_iris_reduced_data_evd]')
     iris = load_iris()
     X = iris.data
     y = iris.target
 
     dimred = DimRed(algo='dimred_evd', n_components=2)
     X_transf = dimred.fit_transform(X)
-    print('X_transf.shape: {}'.format(X_transf.shape))
     fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2, title='Reduced Iris Dataset with DimRed EVD (2 Components)', legend=True)
     plt.show()
 
 def test_draw_scatterplot_3dim_iris_reduced_data_evd():
-    print('\n[test_draw_scatterplot_3dim_iris_reduced_data_evd]')
     iris = load_iris()
     X = iris.data
     y = iris.target
 
     dimred = DimRed(algo='dimred_evd', n_components=3)
     X_transf = dimred.fit_transform(X)
-    print('X_transf.shape: {}'.format(X_transf.shape))
     fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3, title='Reduced Iris Dataset with DimRed EVD (3 Components)', legend=True)
     plt.show()

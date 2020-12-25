@@ -15,12 +15,24 @@ from scipy.sparse import csr_matrix, isspmatrix
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn.decomposition import PCA, SparsePCA, TruncatedSVD
 import matplotlib.pyplot as plt
+import logging
+from logging.handlers import RotatingFileHandler
 
 SPARSITY = 0.6      # define the %sparsity of a matrix -  0.6 means 60% of values are 0
 N_COMPONENTS = 0.95 # default values for returning components using a variance of 95%
 DEFAULT_PCA_ALGO = 'sklearn_pca'
 DEFAULT_TITLE = 'DimRed Plot'
 DEFAULT_FIG_SIZE=(8, 6)
+LOG_FILE='./logs/dimred.log'
+LOG_LEVEL=logging.INFO  #DEBUG, INFO, WARNING, ERROR and CRITICAL
+#logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+
+logging.basicConfig(
+        handlers=[RotatingFileHandler(LOG_FILE, maxBytes=1000000, backupCount=10)],
+        level=LOG_LEVEL,
+        format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+        datefmt='%Y-%m-%dT%H:%M:%S')
+logger = logging.getLogger()
 
 class DimRed():
     """
@@ -180,18 +192,18 @@ class DimRed():
         if self.algo == 'auto':
 
             if self.sp_issparse:  # X is of type scipy.sparse
-                print('[dimred]: X is sparse and of type scipy.sparse - using sklearn TruncatedSVD')
+                logger.info('X is sparse and of type scipy.sparse - using sklearn TruncatedSVD')
                 self.algo = 'sklearn_truncated_svd'
                 X_dimred = self._sklearn_truncated_svd(X)
 
             elif self.issparse: # X is a sparse matrix with lots of 0 but not of type scipy.sparse
-                print('[dimred]: X is sparse - using sklearn SparsePCA')
+                logger.info('X is sparse - using sklearn SparsePCA')
                 self.algo = 'sklearn_sparse_pca'
                 #X_dimred = self._sklearn_pca(X_centered)
                 # Note - n_components must be an integer for this function
                 if self.n_components < 1:
                     self.n_components = X.shape[1] - 1
-                    print('[dimred]: SparsePCA can only use n_components as integer - defaulting to {}'.format(self.n_components))
+                    logger.info('SparsePCA can only use n_components as integer - defaulting to {}'.format(self.n_components))
 
                 X_dimred = self._sklearn_sparse_pca(X)
 
@@ -199,26 +211,27 @@ class DimRed():
 
         # Check input algorithm and use default if not available
         if self.algo == 'sklearn_pca':  # default
-            print('[dimred]: using sklearn PCA')
+            logger.info('using sklearn PCA')
             X_dimred = self._sklearn_pca(X_centered)
 
         elif self.algo == 'dimred_svd':
-            print('[dimred]: using DimRed implementation of SVD for PCA')
+            logger.info('using DimRed implementation of SVD for PCA')
             X_dimred = self._dimred_svd(X_centered)
 
         elif self.algo == 'dimred_evd':
-            print('[dimred]: using DimRed implementation of EVD for PCA')
+            logger.info('using DimRed implementation of EVD for PCA')
             X_dimred = self._dimred_evd(X_centered)
 
         elif self.algo == 'sklearn_truncated_svd':
-            print('[dimred]: using sklearn TruncatedSVD')
+            logger.info('using sklearn TruncatedSVD')
             X_dimred = self._sklearn_truncated_svd(X)
 
         elif self.algo == 'sklearn_sparse_pca':
-            print('[dimred]: using sklearn SparsePCA')
+            logger.info('using sklearn SparsePCA')
             X_dimred = self._sklearn_sparse_pca(X)
 
         else:
+            logger.error('not able to run')
             raise ValueError("[DimRed] - not able to run")
 
         return(X_dimred)
@@ -319,12 +332,12 @@ class DimRed():
 
         # EVD
         eigen_vals_sorted, eigen_vecs_sorted = DimRed._eigen_sorted(X_cov)
-        print('TEST  ---- _dimred_evd: eigen_vals_sorted: {}'.format(eigen_vals_sorted))
-        print('TEST  ---- _dimred_evd: eigen_vecs_sorted: {}'.format(eigen_vecs_sorted))
+        logger.info('eigen_vals_sorted: {}'.format(eigen_vals_sorted))
+        logger.info('eigen_vecs_sorted: {}'.format(eigen_vecs_sorted))
 
         # Postprocess the number of components required
         X_transf = self._postprocess_dimred_pca_evd(X_centered, eigen_vals_sorted, eigen_vecs_sorted)
-        print('TEST  ---- _dimred_evd: X_transf.shape: {}'.format(X_transf.shape))
+        logger.info('X_transf.shape: {}'.format(X_transf.shape))
 
         # Return principal components
         return X_transf
@@ -365,26 +378,26 @@ class DimRed():
             self.sp_issparse = True
             self.issparse = True
             self.sparsity = 1.0 - csr_matrix.getnnz(X) / (X.shape[0] * X.shape[1])
-            print('[dimred]: X is sparse and of type scipy.isparse')
+            logger.info('X is sparse and of type scipy.isparse')
 
         else: # non compressed
             self.sparsity = 1.0 - count_nonzero(X) / X.size
             if self.sparsity > SPARSITY:
                 self.issparse = True
 
-        if self.issparse: print('[dimred]: X has a sparsity of: {}'.format(self.sparsity))
-        else: print('[dimred]: X is not sparse')
+        if self.issparse: logger.info('X has a sparsity of: {}'.format(self.sparsity))
+        else: logger.info('X is not sparse')
 
         n_samples, n_features = X.shape
         self.n_samples_, self.n_features_ = n_samples, n_features
-        print('[dimred]: X has {} observations and {} features'.format(n_samples, n_features))
+        logger.info('X has {} observations and {} features'.format(n_samples, n_features))
 
         if n_features == 1:
             raise ValueError("Number of features {} implies there is not dimensionality reduction that is possible".format(n_features))
 
         if self.n_components > n_features:
-            print('[dimred]: Warning - Number of components {} cannot be higher than number of features {}'.format(self.n_components, n_features))
-            print('[dimred]: Warning - n_components will be set instead to: {}'.format(n_features - 1))
+            logger.warning('Number of components {} cannot be higher than number of features {}'.format(self.n_components, n_features))
+            logger.warning('n_components will be set instead to: {}'.format(n_features - 1))
             self.n_components = n_features - 1
 
         # Center X
