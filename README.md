@@ -38,7 +38,11 @@ import matplotlib.pyplot as plt
 iris = datasets.load_iris()
 features = iris.data
 target = iris.target
+```
 
+
+Dimension Reduction of 2 and plot:
+```python
 # Reduce it to 2 principal components
 dimred = DimRed(algo='dimred_svd', n_components=2)
 X_transf = dimred.fit_transform(X)
@@ -52,9 +56,52 @@ fig, ax = dimred.draw_scatterplot(X_transf2, y=target,
 plt.show()
 ```
 <p align="center" width="100%">
-    <img width="70%" src="images/dimred_2dplot_iris_components.png">
+    <img width="70%" src="images/dimred_iris_scatterplot_2PC_2d.png">
     <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
 </p>
+
+Dimension Reduction of 2 and 2D plot (using the 3rd component as bubble size):
+```python
+# Reduce it to 3 principal components
+dimred = DimRed(algo='dimred_svd', n_components=3)
+X_transf = dimred.fit_transform(X)
+
+# Plot with DimRed - 2d
+fig, ax = dimred.draw_scatterplot(X_transf, y=target,
+                                  PC=3,
+                                  title='Reduced Iris Dataset with DimRed - 3 principal components',
+                                  figsize=(8, 6),
+                                  legend=True)
+plt.show()
+```
+<p align="center" width="100%">
+    <img width="70%" src="images/dimred_iris_scatterplot_3PC_2d.png">
+    <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
+</p>
+
+
+Dimension Reduction of 2 and 3D plot:
+
+```python
+# Reduce it to 3 principal components
+dimred = DimRed(algo='dimred_svd', n_components=3)
+X_transf = dimred.fit_transform(X)
+
+# Plot with DimRed - 3d
+# give larger values for bubble plot from [1-10] range to [100-1000]
+fig, ax = dimred.draw_scatterplot(X_transf, y=target,
+                                  PC=3,
+                                  title='Reduced Iris Dataset with DimRed - 3 principal components ',
+                                  figsize=(8, 6),
+                                  legend=True,
+                                  dim3=True)
+plt.show()
+```
+<p align="center" width="100%">
+    <img width="70%" src="images/dimred_iris_scatterplot_3PC_3d.png">
+    <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
+</p>
+
 
 ### Table of contents
 * [Refresher on Dimension Reduction](#refresher-dimred)

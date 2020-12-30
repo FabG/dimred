@@ -314,7 +314,9 @@ def test_preprocess_components_high():
 
 
 def test_eigen_sorted():
-    X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],[1. , 1., 0.5], [0.8333333333333334, 0.5, 0.3333333333333333]])
+    X_cov_ref = np.array([[2.3333333333333335, 1., 0.8333333333333334],
+                            [1. , 1., 0.5],
+                            [0.8333333333333334, 0.5, 0.3333333333333333]])
 
     X_eig_vecs_ref = np.array([[-0.83234965, -0.50163583, -0.23570226],
                             [-0.45180545,  0.86041634, -0.23570226],
@@ -496,8 +498,12 @@ def test_draw_scatterplot_2dim_iris_reduced_data():
     dimred = DimRed(algo='dimred_svd', n_components=2)
     X_transf = dimred.fit_transform(X)
 
-    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2, title='Reduced Iris Dataset with DimRed SVD (2 Components)', legend=True)
+    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2,
+                title='Reduced Iris Dataset with DimRed SVD (2 Components)',
+                legend=True)
+    #plt.ion()
     plt.show()
+    #plt.pause(0.002)
 
 
 def test_draw_scatterplot_3dim_iris_reduced_data():
@@ -511,7 +517,26 @@ def test_draw_scatterplot_3dim_iris_reduced_data():
     # give larger values for bubble plot from [1-10] range to [100-1000]
     X_transf[:,2] *= 100
 
-    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3, title='Reduced Iris Dataset with DimRed SVD (3 Components)', legend=True)
+    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3,
+            title='Reduced Iris Dataset with DimRed SVD (3 Components)',
+            legend=True)
+    plt.show()
+
+def test_draw_scatterplot_3dim_iris_reduced_data_3d():
+    iris = load_iris()
+    X = iris.data
+    y = iris.target
+
+    dimred = DimRed(algo='dimred_svd', n_components=3)
+    X_transf = dimred.fit_transform(X)
+
+    # give larger values for bubble plot from [1-10] range to [100-1000]
+    X_transf[:,2] *= 100
+
+    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3,
+            title='Reduced Iris Dataset with DimRed SVD (3 Components) in 3D',
+            legend=False,
+            dim3=True)
     plt.show()
 
 def test_draw_scatterplot_2dim_iris_reduced_data_evd():
@@ -521,7 +546,9 @@ def test_draw_scatterplot_2dim_iris_reduced_data_evd():
 
     dimred = DimRed(algo='dimred_evd', n_components=2)
     X_transf = dimred.fit_transform(X)
-    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2, title='Reduced Iris Dataset with DimRed EVD (2 Components)', legend=True)
+    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2,
+            title='Reduced Iris Dataset with DimRed EVD (2 Components)',
+            legend=True)
     plt.show()
 
 def test_draw_scatterplot_3dim_iris_reduced_data_evd():
@@ -531,9 +558,11 @@ def test_draw_scatterplot_3dim_iris_reduced_data_evd():
 
     dimred = DimRed(algo='dimred_evd', n_components=3)
     X_transf = dimred.fit_transform(X)
-    
+
     # give larger values for bubble plot from [1-10] range to [100-1000]
     X_transf[:,2] *= 100
 
-    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3, title='Reduced Iris Dataset with DimRed EVD (3 Components)', legend=True)
+    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3,
+            title='Reduced Iris Dataset with DimRed EVD (3 Components)',
+            legend=True)
     plt.show()

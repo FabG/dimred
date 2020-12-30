@@ -15,6 +15,7 @@ from scipy.sparse import csr_matrix, isspmatrix
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn.decomposition import PCA, SparsePCA, TruncatedSVD
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -97,7 +98,8 @@ class DimRed():
         return (model)
 
 
-    def draw_scatterplot(self, X, y=None, PC=2, title=DEFAULT_TITLE, figsize=DEFAULT_FIG_SIZE, legend=False) :
+    def draw_scatterplot(self, X, y=None, PC=2, title=DEFAULT_TITLE,
+                        figsize=DEFAULT_FIG_SIZE, legend=False, dim3=False) :
         """
         Render X as a scatter 2d plot with 2 or 3 components
 
@@ -115,6 +117,8 @@ class DimRed():
             Figure dimension (width, height) in inches.
         legend : boolean, default : False
             Displays a legend if set to True
+        3d : boolean, default : False
+            Displays a map as 3D if there are 3 PCs
 
         Returns
         -------
@@ -131,18 +135,37 @@ class DimRed():
         if PC not in (2,3,4):
             raise ValueError("[DimRed] - PC needs to be 2, 3 or 4 to be plotted")
 
-        ax.set_title(title)
+        if dim3:
+            ax = Axes3D(fig, elev=-150, azim=110)
+            ax.w_xaxis.set_ticklabels([])
+            ax.w_yaxis.set_ticklabels([])
+            ax.w_zaxis.set_ticklabels([])
+
         ax.set_xlabel('PC1'+ axis_title_0)
         ax.set_ylabel('PC2'+ axis_title_1)
+        if dim3: ax.set_zlabel('PC3'+ axis_title_2)
+
+        ax.set_title(title)
 
         if PC == 2:
-            scatter = plt.scatter(X[:,0], X[:,1], alpha=0.4, c=y, cmap='viridis')
+            scatter = plt.scatter(X[:,0], X[:,1],
+                                alpha=0.4, c=y, edgecolor='k',
+                                cmap='viridis')
 
         if PC == 3:
-            # used the 3rd PC as size of the plot 's'
-            scatter = plt.scatter(X[:,0], X[:,1], s=X[:,2], c=y, alpha=0.4, cmap='viridis')
+            if dim3:
+                # used the 3rd PC as size of the plot 's'
+                scatter = ax.scatter(X[:,0], X[:,1], X[:,2],
+                                    c=y, alpha=0.4, edgecolor='k',
+                                    cmap='viridis', s=40)
+                ax.set_title(title)
+            else:
+                # used the 3rd PC as size of the plot 's'
+                scatter = plt.scatter(X[:,0], X[:,1], s=X[:,2],
+                                    c=y, alpha=0.4, edgecolor='k',
+                                    cmap='viridis')
 
-        if legend:
+        if legend and dim3==False:
             if PC in (2,3):
                 # produce a legend with the unique colors from the scatter
                 legend1 = ax.legend(*scatter.legend_elements(),
