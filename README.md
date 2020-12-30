@@ -31,6 +31,30 @@ PCA aims to find linearly uncorrelated orthogonal axes, which are also known as 
    </p>
 Since all the PCs (Principal Components) are orthogonal to each other, we can use a pair of perpendicular lines in the 2-D space as the two PCs. To make the first PC capture the largest variance, we rotate our pair of PCs to make one of them optimally align with the spread of the data points. Next, all the data points can be projected onto the PCs, and their projections (red dots on PC1) are essentially the resultant dimensionality-reduced representation of the dataset. Viola, we just reduced the matrix from 2-D to 1-D while retaining the largest variance!
 
+And here is an example of dimension reduction on the famous [iris dataset](https://scikit-learn.org/stable/auto_examples/datasets/plot_iris_dataset.html) and using the `DimRed` package:
+```python
+# Load the data
+import matplotlib.pyplot as plt
+iris = datasets.load_iris()
+features = iris.data
+target = iris.target
+
+# Reduce it to 2 principal components
+dimred = DimRed(algo='dimred_svd', n_components=2)
+X_transf = dimred.fit_transform(X)
+
+# Plot with DimRed - 2d
+fig, ax = dimred.draw_scatterplot(X_transf2, y=target,
+                                  PC=2,
+                                  title='Reduced Iris Dataset with DimRed - 2 principal components',
+                                  figsize=(8, 6),
+                                  legend=True)
+plt.show()
+```
+<p align="center" width="100%">
+    <img width="70%" src="images/dimred_2dplot_iris_components.png">
+    <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
+</p>
 
 ### Table of contents
 * [Refresher on Dimension Reduction](#refresher-dimred)
