@@ -2,3 +2,6 @@ __pycache__
 .coverage
 .ipynb_checkpoints
 **/logs/dimred.log
+dimred.egg-info
+dist
+build

@@ -141,7 +141,7 @@ It is **desirable to have simple models that generalize well**, and in turn, inp
 `DimRed` is currently built as a python package.
 It will be soon hosted in artifactory to be pip installable as well as in MLaaS to be available as a service.
 
-For now, you can use it by cloning this repo and from the home directoy, follow the below steps.
+For now, you can use it by cloning this repo and from the home directory, follow the below steps.
 
 #### 2.1 Install
 You need to run Python 3.X.
@@ -182,6 +182,28 @@ Or:
 
 We should aim at having a minimum of 80% code coverage, and preferably closer or equal to 100%.
 
+#### 2.3 Packaging
+To generate distribution packages, make sure you have the latest versions of `setuptools` and `wheels` installed:
+```bash
+python3 -m pip install --user --upgrade setuptools wheel
+```
+
+Now run this command from the same directory where setup.py is located:
+```bash
+python3 setup.py sdist bdist_wheel
+```
+
+This command will create several directories: `dimred.egg-info`, `dist` and `build`.
+It should output a lot of text and once completed should generate two files in the `dist` directory which is what we are interested into:
+```
+dist/
+  dimred-0.1.0-py3-none-any.whl
+  dimred-0.1.0.tar.gz
+```
+
+The `tar.gz` file is a Source Archive whereas the `.whl` file is a Built Distribution. Newer pip versions preferentially install built distributions, but will fall back to source archives if needed. You should always upload a source archive and provide built archives for the platforms your project is compatible with. In this case, our example package is compatible with Python on any platform so only one built distribution is needed.
+
+Pro tip: Add these directories to your ``.gitignore` file, to prevent pushing installation files to your repo.
 
 ### <a name="dimred-examples"></a> 3. DimRed Examples
 
@@ -281,6 +303,7 @@ X_pca.shape
 
 
 ### <a name="dimred-notebooks"></a> 4. Dimension Reduction Notebooks
+ - [DimRed Demo notebook](notebooks/dimred_demo.ipynb)
  - [PCA implementation with EVD and SVD](notebooks/pca_evd_svd.ipynb) => provides implementation of PCA with EVD and SVD and shows SVD is a better implementation
  - [PCA vs LDA and PCA visualization on Iris data](notebooks/pca_lda_iris.ipynb)
 
