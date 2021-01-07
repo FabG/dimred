@@ -3,7 +3,7 @@
 
 ### DimRed Introduction
 <img align="left" src="https://github.com/FabG/dimred/blob/master/images/Dimred_s3.png" style="vertical-align:left;margin:0px 10px">
-<!--img align="left" src="images/DimRed_Logo_s.jpg" width="170" height="100" style="vertical-align:left;margin:0px 10px"-->
+<!--img align="left" src="https://github.com/FabG/dimred/blob/master/images/DimRed_Logo_s.jpg" width="170" height="100" style="vertical-align:left;margin:0px 10px"-->
 
 **DimRed** is a python package that enables **Dimension Reduction** leveraging various algorithms with the default being
   **PCA** (Principal Component Analysis).
@@ -75,7 +75,7 @@ fig, ax = dimred.draw_scatterplot(X_transf, y=target,
 plt.show()
 ```
 <p align="center" width="100%">
-    <img width="70%" src="images/dimred_iris_scatterplot_3PC_2d.png">
+    <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/dimred_iris_scatterplot_3PC_2d.png">
     <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
 </p>
 
@@ -98,7 +98,7 @@ fig, ax = dimred.draw_scatterplot(X_transf, y=target,
 plt.show()
 ```
 <p align="center" width="100%">
-    <img width="70%" src="images/dimred_iris_scatterplot_3PC_3d.png">
+    <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/dimred_iris_scatterplot_3PC_3d.png">
     <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
 </p>
 
@@ -334,7 +334,7 @@ PCA aims to find linearly uncorrelated orthogonal axes, which are also known as 
 Let’s intuitively understand PCA by fitting it on a 3-D data matrix, which can be conveniently represented by a 3-D scatter plot:
 
 <p align="center" width="100%">
-    <img width="70%" src="images/pca_3d_2d.png">
+    <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/pca_3d_2d.png">
     <br><i>3D to 2D dimension reduction with PCA <a href="https://medium.com/@TheDataGyan/dimensionality-reduction-with-pca-and-t-sne-in-r-2715683819"> (source)</a></i>
 </p>
 
@@ -348,12 +348,12 @@ The PCs can be determined via eigen decomposition of the covariance matrix C. Af
 Image for post
 Eigendecomposition of the covariance matrix C:  
 <p align="center" width="100%">
-    <img width="40%" src="images/eidgen_decomposition_covariance.png">
+    <img width="40%" src="https://github.com/FabG/dimred/blob/master/images/eidgen_decomposition_covariance.png">
 </p>
 
 In the equation above, the covariance matrix C(m×m) is decomposed to a matrix of eigenvectors W(m×m) and a diagonal matrix of m eigenvalues Λ. The eigenvectors, which are the column vectors in W, are in fact the PCs we are seeking. We can then use matrix multiplication to project the data onto the PC space. For the purpose of dimensionality reduction, we can project the data points onto the first k PCs as the representation of the data:  
 <p align="center" width="100%">
-    <img width="30%" src="images/projected_data.png">
+    <img width="30%" src="https://github.com/FabG/dimred/blob/master/images/projected_data.png">
 </p>
 
 Notes: PCA is an analysis approach. You can do PCA using SVD, or you can do PCA doing the eigen-decomposition, or you can do PCA using many other methods.  In fact, most implementations of PCA actually use performs SVD under the hood rather than doing eigen decomposition on the covariance matrix because SVD can be much more efficient and is able to handle sparse matrices. In addition, there are reduced forms of SVD which are even more economic to compute.
@@ -414,7 +414,7 @@ SVD is another decomposition method for both real and complex matrices. It decom
 
 Here is a friendler  way to visualize the **SVD** formula:
 <p align="center" width="100%">
-    <img width="40%" src="images/svd_matrix.png">
+    <img width="40%" src="https://github.com/FabG/dimred/blob/master/images/svd_matrix.png">
     <br><i>Illustration of SVD<a href="https://towardsdatascience.com/pca-and-svd-explained-with-numpy-5d13b0d2a4d8"> (source)</a></i>
 </p>
 
@@ -445,12 +445,12 @@ def svd(X):
 ##### Relationship between PCA and SVD
 PCA and SVD are closely related approaches and can be both applied to decompose any rectangular matrices. We can look into their relationship by performing SVD on the covariance matrix C:
 <p align="center" width="100%">
-    <img width="40%" src="images/covariance_matrix_pca_svd.png">
+    <img width="40%" src="https://github.com/FabG/dimred/blob/master/images/covariance_matrix_pca_svd.png">
 </p>
 
 From the above derivation, we notice that the result is in the same form with eigen decomposition of C, we can easily see the relationship between singular values (Σ) and eigenvalues (Λ):
 <p align="center" width="100%">
-    <img width="40%" src="images/eigen_singular_values_relationship.png">
+    <img width="40%" src="https://github.com/FabG/dimred/blob/master/images/eigen_singular_values_relationship.png">
 </p>
 
 
