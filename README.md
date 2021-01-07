@@ -2,7 +2,7 @@
 
 
 ### DimRed Introduction
-<img align="left" src="images/Dimred_s3.png" style="vertical-align:left;margin:0px 10px">
+<img align="left" src="https://github.com/FabG/dimred/blob/master/images/Dimred_s3.png" style="vertical-align:left;margin:0px 10px">
 <!--img align="left" src="images/DimRed_Logo_s.jpg" width="170" height="100" style="vertical-align:left;margin:0px 10px"-->
 
 **DimRed** is a python package that enables **Dimension Reduction** leveraging various algorithms with the default being
@@ -26,7 +26,7 @@ Here is an example with `PCA` (Principal Component Analysis) that is using a Lin
 PCA aims to find linearly uncorrelated orthogonal axes, which are also known as principal components (PCs) in the m dimensional space to project the data points onto those PCs. The first PC captures the largest variance in the data. Let’s intuitively understand PCA by fitting it on a 2-D data matrix, which can be conveniently represented by a 2-D scatter plot:
 
    <p align="center" width="100%">
-       <img width="70%" src="images/pca_animation.gif">
+       <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/pca_animation.gif">
        <br><i>Making sense of PCA by fitting on a 2-D dataset<a href="https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues/140579#140579"> (source)</a></i>
    </p>
 Since all the PCs (Principal Components) are orthogonal to each other, we can use a pair of perpendicular lines in the 2-D space as the two PCs. To make the first PC capture the largest variance, we rotate our pair of PCs to make one of them optimally align with the spread of the data points. Next, all the data points can be projected onto the PCs, and their projections (red dots on PC1) are essentially the resultant dimensionality-reduced representation of the dataset. Viola, we just reduced the matrix from 2-D to 1-D while retaining the largest variance!
@@ -56,7 +56,7 @@ fig, ax = dimred.draw_scatterplot(X_transf2, y=target,
 plt.show()
 ```
 <p align="center" width="100%">
-    <img width="70%" src="images/dimred_iris_scatterplot_2PC_2d.png">
+    <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/dimred_iris_scatterplot_2PC_2d.png">
     <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
 </p>
 
