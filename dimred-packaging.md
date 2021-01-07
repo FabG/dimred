@@ -2,7 +2,36 @@
 The below instructions are for maintaining, updating and uploading dimred as a python package to PiPy.
 You can go back to the main [README](readme.md) for using dimred package
 
-#### 1. Packaging
+#### 1. Automatic packaging and uploading to PiPy
+A Shell scripts was built to automate the build+upload to Pipy: `build_deploy_pipy.sh`
+To package `dimred` and test it first at `test.pipy.org/dimred`, run:
+```bash
+./build_deploy_pipy.sh --test
+```
+You will be promoted for your `PiPy` username and password.
+
+To package it and make it available to the pipy cominuty at `pipy.org/dimred`
+```bash
+./build_deploy_pipy.sh
+```
+
+Once this completes successfully, you can pip install your package as follow:
+```bash
+pip install -i https://test.pypi.org/simple/ dimred
+```
+or
+```bash
+pip install -i https://pypi.org/simple/ dimred
+```
+
+And you can import it to test in python:
+```python
+python
+>>> import dimred
+```
+
+#### 2. Manual Packaging and uploading to PiPy
+##### 2.1 Packaging
 To generate distribution packages, make sure you have the latest versions of `setuptools` and `wheels` installed:
 ```bash
 python3 -m pip install --user --upgrade setuptools wheel
@@ -25,7 +54,7 @@ The `tar.gz` file is a Source Archive whereas the `.whl` file is a Built Distrib
 
 Pro tip: Add these directories to your `.gitignore` file, to prevent pushing installation files to your repo.
 
-#### 2. Building & Deploying
+##### 2.2 Building & Deploying
 If not done already, go to [pypi.org](https://pypi.org/) and create an account. You’ll need it to upload your new library.
 You can also do so at the test website [test.pypi.org](https://test.pypi.org/)
 

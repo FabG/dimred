@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 HERE = pathlib.Path(__file__).parent
 
-VERSION = '0.1.0'
+VERSION = '0.0.1'
 PACKAGE_NAME = 'dimred'
 AUTHOR = 'Fabrice Guillaume'
 AUTHOR_EMAIL = 'fabrice.guillaume@email.com'
