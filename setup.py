@@ -25,7 +25,8 @@ INSTALL_REQUIRES = [
       'colourmap',
       'pytest',
       'pytest-cov',
-      'seaborn'
+      'seaborn',
+      'pathlib'
 ]
 
 CLASSIFIERS = [

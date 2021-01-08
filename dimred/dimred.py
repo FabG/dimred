@@ -24,7 +24,7 @@ N_COMPONENTS = 0.95 # default values for returning components using a variance o
 DEFAULT_PCA_ALGO = 'sklearn_pca'
 DEFAULT_TITLE = 'DimRed Plot'
 DEFAULT_FIG_SIZE=(8, 6)
-LOG_FILE='./logs/dimred.log'
+LOG_FILE='dimred.log'
 LOG_LEVEL=logging.INFO  #DEBUG, INFO, WARNING, ERROR and CRITICAL
 #logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
