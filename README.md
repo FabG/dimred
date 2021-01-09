@@ -183,7 +183,12 @@ Or:
 > pytest --capture=tee-sys --cov=dimred tests/
 ```
 
-We should aim at having a minimum of 80% code coverage, and preferably closer or equal to 100%.
+To run a particular test, run:
+```bash
+> pytest --capture=tee-sys --cov=dimred tests/ -k '<your test>'
+```
+
+We should aim at having a **minimum of 80% code coverage**, and preferably closer or equal to 100%.
 
 
 #### 2.3 PAckaging and uploading to PiPy

@@ -72,6 +72,7 @@ class DimRed():
         """
 
         # Store in object
+        logger.info('======> DimRed Initialization')
         self.n_components = n_components
         self.algo = algo
         self.sp_issparse = False
@@ -95,6 +96,7 @@ class DimRed():
             Returns the instance itself.
         """
         model = self._fit_transform(X)
+        logger.info('<====== DimRed Completion\n')
         return (model)
 
 
@@ -212,12 +214,12 @@ class DimRed():
         if self.algo == 'auto':
 
             if self.sp_issparse:  # X is of type scipy.sparse
-                logger.info('X is sparse and of type scipy.sparse - using sklearn TruncatedSVD')
+                logger.info('X is sparse and of type scipy.sparse => using sklearn TruncatedSVD')
                 self.algo = 'sklearn_truncated_svd'
                 X_dimred = self._sklearn_truncated_svd(X)
 
             elif self.issparse: # X is a sparse matrix with lots of 0 but not of type scipy.sparse
-                logger.info('X is sparse - using sklearn SparsePCA')
+                logger.info('X is sparse => using sklearn SparsePCA')
                 self.algo = 'sklearn_sparse_pca'
                 #X_dimred = self._sklearn_pca(X_centered)
                 # Note - n_components must be an integer for this function
@@ -231,23 +233,23 @@ class DimRed():
 
         # Check input algorithm and use default if not available
         if self.algo == 'sklearn_pca':  # default
-            logger.info('using sklearn PCA')
+            logger.info(' => using sklearn PCA')
             X_dimred = self._sklearn_pca(X_centered)
 
         elif self.algo == 'dimred_svd':
-            logger.info('using DimRed implementation of SVD for PCA')
+            logger.info(' => using DimRed implementation of SVD for PCA')
             X_dimred = self._dimred_svd(X_centered)
 
         elif self.algo == 'dimred_evd':
-            logger.info('using DimRed implementation of EVD for PCA')
+            logger.info('=> using DimRed implementation of EVD for PCA')
             X_dimred = self._dimred_evd(X_centered)
 
         elif self.algo == 'sklearn_truncated_svd':
-            logger.info('using sklearn TruncatedSVD')
+            logger.info(' => using sklearn TruncatedSVD')
             X_dimred = self._sklearn_truncated_svd(X)
 
         elif self.algo == 'sklearn_sparse_pca':
-            logger.info('using sklearn SparsePCA')
+            logger.info(' => using sklearn SparsePCA')
             X_dimred = self._sklearn_sparse_pca(X)
 
         else:
@@ -273,6 +275,7 @@ class DimRed():
 
         # Postprocessing
         X_transf = self._postprocess_sklearn_truncated_svd(X_transf, pca)
+        logger.info('Output Matrix X_transf has {} observations and {} components'.format(X_transf.shape[0], X_transf.shape[1]))
 
         return(X_transf)
 
@@ -297,6 +300,7 @@ class DimRed():
 
         # Postprocessing
         X_transf = self._postprocess_sklearn_pca(X_transf, pca)
+        logger.info('Output Matrix X_transf has {} observations and {} components'.format(X_transf.shape[0], X_transf.shape[1]))
 
         return(X_transf)
 
@@ -313,6 +317,7 @@ class DimRed():
 
         # Postprocessing
         X_transf = self._postprocess_sklearn_sparsepca(X_transf, pca)
+        logger.info('Output Matrix X_transf has {} observations and {} components'.format(X_transf.shape[0], X_transf.shape[1]))
 
         return(X_transf)
 
@@ -337,6 +342,9 @@ class DimRed():
 
         # Postprocess the number of components required
         X_transf = self._postprocess_dimred_pca_svd(U, Sigma, Vt)
+        logger.info('n_features_: {}'.format(self.n_features_))
+        logger.info('n_samples_: {}'.format(self.n_samples_))
+        logger.info('Output Matrix X_transf has {} observations and {} components'.format(X_transf.shape[0], X_transf.shape[1]))
 
         # Return principal components
         return X_transf
@@ -357,7 +365,7 @@ class DimRed():
 
         # Postprocess the number of components required
         X_transf = self._postprocess_dimred_pca_evd(X_centered, eigen_vals_sorted, eigen_vecs_sorted)
-        logger.info('X_transf.shape: {}'.format(X_transf.shape))
+        logger.info('Output Matrix X_transf has {} observations and {} components'.format(X_transf.shape[0], X_transf.shape[1]))
 
         # Return principal components
         return X_transf
@@ -389,6 +397,18 @@ class DimRed():
         """
         Preprocessing
         """
+        n_samples, n_features = X.shape
+        self.n_samples_, self.n_features_ = n_samples, n_features
+        logger.info('Input Matrix X has {} observations and {} features'.format(n_samples, n_features))
+        logger.info('TEST - self.n_features_: {}'.format(self.n_features_))
+
+        if n_features == 1:
+            raise ValueError("Number of features {} implies there is not dimensionality reduction that is possible".format(n_features))
+
+        if self.n_components > n_features:
+            logger.warning('Number of components {} cannot be higher than number of features {}'.format(self.n_components, n_features))
+            logger.warning('n_components will be set instead to: {}'.format(n_features - 1))
+            self.n_components = n_features - 1
 
         # Check if input matrix is sparse
         # scipy.sparse defines a number of optimized sparse objects and issparse
@@ -407,18 +427,6 @@ class DimRed():
 
         if self.issparse: logger.info('X has a sparsity of: {}'.format(self.sparsity))
         else: logger.info('X is not sparse')
-
-        n_samples, n_features = X.shape
-        self.n_samples_, self.n_features_ = n_samples, n_features
-        logger.info('X has {} observations and {} features'.format(n_samples, n_features))
-
-        if n_features == 1:
-            raise ValueError("Number of features {} implies there is not dimensionality reduction that is possible".format(n_features))
-
-        if self.n_components > n_features:
-            logger.warning('Number of components {} cannot be higher than number of features {}'.format(self.n_components, n_features))
-            logger.warning('n_components will be set instead to: {}'.format(n_features - 1))
-            self.n_components = n_features - 1
 
         # Center X
         return DimRed._center(X), n_samples, n_features
@@ -482,8 +490,6 @@ class DimRed():
             Equal to the average of (min(n_features, n_samples) - n_components)
             smallest eigenvalues of the covariance matrix of X.
         """
-        self.n_features_ = pca.n_features_
-        self.n_samples_ = pca.n_samples_
         self.explained_variance_ = pca.explained_variance_
         self.explained_variance_ratio_ = pca.explained_variance_ratio_
         self.singular_values_ = pca.singular_values_
@@ -491,6 +497,15 @@ class DimRed():
         self.components_ = pca.components_
         self.n_components_ = pca.n_components_
         self.noise_variance_ = pca.noise_variance_
+
+        logger.info('n_features_: {}'.format(self.n_features_))
+        logger.info('n_samples_: {}'.format(self.n_samples_))
+        #logger.info('components_: \n{}'.format(self.components_))
+        logger.info('n_components_: {}'.format(self.n_components_))
+        logger.info('explained_variance_: \n{}'.format(self.explained_variance_))
+        logger.info('explained_variance_ratio_: \n{}'.format(self.explained_variance_ratio_))
+        logger.info('singular_values_: \n{}'.format(self.singular_values_))
+        logger.info('noise_variance_: {}'.format(self.noise_variance_))
 
         return X
 
@@ -516,6 +531,18 @@ class DimRed():
         self.explained_variance_ = pca.explained_variance_
         self.explained_variance_ratio_ = pca.explained_variance_ratio_
         self.singular_values_ = pca.singular_values_
+        # Truncated SVD does not have n_components and noise variance
+        #self.n_components_ = pca.n_components_
+        #self.noise_variance_ = pca.noise_variance_
+
+        logger.info('n_features_: {}'.format(self.n_features_))
+        logger.info('n_samples_: {}'.format(self.n_samples_))
+        #logger.info('components_: \n{}'.format(self.components_))
+        #logger.info('n_components_: {}'.format(self.n_components_))
+        logger.info('explained_variance_: \n{}'.format(self.explained_variance_))
+        logger.info('explained_variance_ratio_: \n{}'.format(self.explained_variance_ratio_))
+        logger.info('singular_values_: \n{}'.format(self.singular_values_))
+        #logger.info('noise_variance_: {}'.format(self.noise_variance_))
 
         return X
 
@@ -541,6 +568,12 @@ class DimRed():
         self.components_ = pca.components_
         self.n_components_ = pca.n_components_
         self.mean_ = pca.mean_
+
+        logger.info('n_features_: {}'.format(self.n_features_))
+        logger.info('n_samples_: {}'.format(self.n_samples_))
+        #logger.info('components_: \n{}'.format(self.components_))
+        logger.info('n_components_: {}'.format(self.n_components_))
+        logger.info('mean_: {}'.format(self.mean_))
 
         return X
 
@@ -586,6 +619,14 @@ class DimRed():
         X_transf[:] = U[:, :self.n_components_]
         X_transf *= Sigma[:self.n_components_]
 
+        #logger.info('n_features_: {}'.format(self.n_features_))
+        #logger.info('n_samples_: {}'.format(self.n_samples_))
+        #logger.info('components_: \n{}'.format(self.components_))
+        logger.info('n_components_: {}'.format(self.n_components_))
+        logger.info('explained_variance_: \n{}'.format(self.explained_variance_))
+        logger.info('explained_variance_ratio_: \n{}'.format(self.explained_variance_ratio_))
+        logger.info('noise_variance_: {}'.format(self.noise_variance_))
+
         return X_transf
 
 
@@ -613,11 +654,13 @@ class DimRed():
 
         self.components_ = eigen_vecs_sorted[:n_components]
         self.n_components_ = n_components
-        self.explained_variance_ = explained_variance_
+        self.explained_variance_ = explained_variance_[:n_components]
         self.explained_variance_ratio_ = explained_variance_ratio_[:n_components]
         self.noise_variance_ = explained_variance_[n_components:].mean()
 
-        logger.info('components_: \n{}'.format(self.components_))
+        logger.info('n_features_: {}'.format(self.n_features_))
+        logger.info('n_samples_: {}'.format(self.n_samples_))
+        #logger.info('components_: \n{}'.format(self.components_))
         logger.info('n_components_: {}'.format(self.n_components_))
         logger.info('explained_variance_: \n{}'.format(self.explained_variance_))
         logger.info('explained_variance_ratio_: \n{}'.format(self.explained_variance_ratio_))
