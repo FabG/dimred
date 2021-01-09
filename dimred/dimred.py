@@ -139,15 +139,19 @@ class DimRed():
 
         if dim3:
             ax = Axes3D(fig, elev=-150, azim=110)
-            ax.w_xaxis.set_ticklabels([])
-            ax.w_yaxis.set_ticklabels([])
-            ax.w_zaxis.set_ticklabels([])
+            ax.xaxis.set_ticklabels([])
+            ax.yaxis.set_ticklabels([])
+            ax.zaxis.set_ticklabels([])
 
-        ax.set_xlabel('PC1'+ axis_title_0)
-        ax.set_ylabel('PC2'+ axis_title_1)
-        if dim3: ax.set_zlabel('PC3'+ axis_title_2)
+        ax.set_xlabel('Principal Component 1' + axis_title_0)
+        ax.set_ylabel('Principal Component 2' + axis_title_1)
+        if dim3: ax.set_zlabel('Principal Component 3' + axis_title_2)
 
-        ax.set_title(title)
+        if dim3:
+            ax.text2D(0.2, 0.95, title, transform=ax.transAxes)
+        else:
+            ax.set_title(title)
+
 
         if PC == 2:
             scatter = plt.scatter(X[:,0], X[:,1],
@@ -160,25 +164,26 @@ class DimRed():
                 scatter = ax.scatter(X[:,0], X[:,1], X[:,2],
                                     c=y, alpha=0.4, edgecolor='k',
                                     cmap='viridis', s=40)
-                ax.set_title(title)
             else:
                 # used the 3rd PC as size of the plot 's'
                 scatter = plt.scatter(X[:,0], X[:,1], s=X[:,2],
                                     c=y, alpha=0.4, edgecolor='k',
                                     cmap='viridis')
+                fig.tight_layout()
 
-        if legend and dim3==False:
+
+        if legend:
             if PC in (2,3):
                 # produce a legend with the unique colors from the scatter
                 legend1 = ax.legend(*scatter.legend_elements(),
                 loc="lower left", title="Classes")
                 ax.add_artist(legend1)
             if PC == 3:
-                # produce a legend with a cross section of sizes from the scatter
-                handles, labels = scatter.legend_elements(prop="sizes", alpha=0.6)
-                legend2 = ax.legend(handles, labels, loc="upper right", title="Sizes")
+                if dim3 == False:
+                    # produce a legend with a cross section of sizes from the scatter
+                    handles, labels = scatter.legend_elements(prop="sizes", alpha=0.6)
+                    legend2 = ax.legend(handles, labels, loc="upper right", title="Sizes")
 
-        fig.tight_layout()
         return fig, ax
 
 
@@ -190,11 +195,11 @@ class DimRed():
         axis_title_1 = ''
         axis_title_2 = ''
         if len(self.explained_variance_ratio_) > 0:
-            axis_title_0 = ' (' + str(self.explained_variance_ratio_[0]*100)[0:4] + '% expl. var)'
+            axis_title_0 = '\n(' + str(self.explained_variance_ratio_[0]*100)[0:4] + '% explained variance)'
         if len(self.explained_variance_ratio_) > 1:
-            axis_title_1 = ' (' + str(self.explained_variance_ratio_[1]*100)[0:4] + '% expl. var)'
+            axis_title_1 = '\n(' + str(self.explained_variance_ratio_[1]*100)[0:4] + '% explained variance)'
         if len(self.explained_variance_ratio_) > 2:
-            axis_title_2 = '(' + str(self.explained_variance_ratio_[2]*100)[0:4] + '% expl. var)'
+            axis_title_2 = '\n(' + str(self.explained_variance_ratio_[2]*100)[0:4] + '% explained variance)'
 
         return (axis_title_0, axis_title_1, axis_title_2)
 
@@ -656,7 +661,7 @@ class DimRed():
         self.n_components_ = n_components
         self.explained_variance_ = explained_variance_[:n_components]
         self.explained_variance_ratio_ = explained_variance_ratio_[:n_components]
-        self.noise_variance_ = explained_variance_[n_components:].mean()
+        #self.noise_variance_ = explained_variance_[n_components:].mean()
 
         logger.info('n_features_: {}'.format(self.n_features_))
         logger.info('n_samples_: {}'.format(self.n_samples_))
@@ -664,7 +669,7 @@ class DimRed():
         logger.info('n_components_: {}'.format(self.n_components_))
         logger.info('explained_variance_: \n{}'.format(self.explained_variance_))
         logger.info('explained_variance_ratio_: \n{}'.format(self.explained_variance_ratio_))
-        logger.info('noise_variance_: {}'.format(self.noise_variance_))
+        #logger.info('noise_variance_: {}'.format(self.noise_variance_))
 
         # Project the data
         X_transf = np.empty([n_samples, self.n_components_])
