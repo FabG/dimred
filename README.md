@@ -2,20 +2,23 @@
 
 
 ### DimRed Introduction
-<img align="left" src="https://github.com/FabG/dimred/blob/master/images/Dimred_s3.png" style="vertical-align:left;margin:0px 10px">
-<!--img align="left" src="https://github.com/FabG/dimred/blob/master/images/DimRed_Logo_s.jpg" width="170" height="100" style="vertical-align:left;margin:0px 10px"-->
+<img align="right" src="https://github.com/FabG/dimred/raw/master/images/Dimred_s3.png" style="vertical-align:left;margin:0px 10px">
+<!--img align="left" src="https://github.com/FabG/dimred/raw/master/images/DimRed_Logo_s.jpg" width="170" height="100" style="vertical-align:left;margin:0px 10px"-->
 
 **DimRed** is a python package that enables **Dimension Reduction** leveraging various algorithms with the default being
-  **PCA** (Principal Component Analysis).
-This package will also soon offer visualization capabilities.
+  **PCA** (Principal Component Analysis). The algorithms supported so far are:
+   - numpy `EVD`, `SVD`
+   - sklearn `PCA`, `SparsePCA` and `TruncatedSVD`.
+
+This package also offers some **visualization** capabilities to explore the principal components (up to 2 or 3 PC, in 2D or 3D).
 
 
-It offers several functions, some built-in, some others acting as "pass through" for existing scikit learn packages:
+DimRed has some built-in functions written in `numpy` and others leveraging the well known `sklearn` built-in functions:
  - internally built SVD and EVD methods with `numpy`:
   - `dimred_svd` - Dimension reduction using the Singular Value Decomposition: `X . V = U . S ==> X = U.S.Vt`
   This should return the same results as `sklearn_pca` and it uses `np.linalg.svd`
   - `dimred_evd`- Dimension reduction using the Eigen Value Decomposition, based on `C` being the covariance matrix of X `C = XT x X / (n -1)` and `C = Q Λ QT` where `Λ` is a diagonal matrix with eigenvalues in decreasing order on the diagonal. It uses `np.linalg.eig`
- - "pass through" methods exposing `sklearn.decomposition` algorithms:
+ - `sklearn.decomposition` algorithms:
    - `sklearn_pca` - leverages sklearn [PCA()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) that is a Linear dimension reduction function that uses SVD.
    This should return the same results as numpy based internal implementation of SVD: `dimred_svd`
    - `sklearn_sparse_pca` - using sklearn [SparsePCA()](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.SparsePCA.html) also great for Sparse matrices that are *not* of type `scipy.sparse`
@@ -26,7 +29,7 @@ Here is an example with `PCA` (Principal Component Analysis) that is using a Lin
 PCA aims to find linearly uncorrelated orthogonal axes, which are also known as principal components (PCs) in the m dimensional space to project the data points onto those PCs. The first PC captures the largest variance in the data. Let’s intuitively understand PCA by fitting it on a 2-D data matrix, which can be conveniently represented by a 2-D scatter plot:
 
    <p align="center" width="100%">
-       <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/pca_animation.gif">
+       <img width="70%" src="https://github.com/FabG/dimred/raw/master/images/pca_animation.gif">
        <br><i>Making sense of PCA by fitting on a 2-D dataset<a href="https://stats.stackexchange.com/questions/2691/making-sense-of-principal-component-analysis-eigenvectors-eigenvalues/140579#140579"> (source)</a></i>
    </p>
 Since all the PCs (Principal Components) are orthogonal to each other, we can use a pair of perpendicular lines in the 2-D space as the two PCs. To make the first PC capture the largest variance, we rotate our pair of PCs to make one of them optimally align with the spread of the data points. Next, all the data points can be projected onto the PCs, and their projections (red dots on PC1) are essentially the resultant dimensionality-reduced representation of the dataset. Viola, we just reduced the matrix from 2-D to 1-D while retaining the largest variance!
@@ -56,7 +59,7 @@ fig, ax = dimred.draw_scatterplot(X_transf2, y=target,
 plt.show()
 ```
 <p align="center" width="100%">
-    <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/dimred_iris_scatterplot_2PC_2d.png">
+    <img width="70%" src="https://github.com/FabG/dimred/raw/master/images/dimred_iris_scatterplot_2PC_2d.png">
     <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
 </p>
 
@@ -75,7 +78,7 @@ fig, ax = dimred.draw_scatterplot(X_transf, y=target,
 plt.show()
 ```
 <p align="center" width="100%">
-    <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/dimred_iris_scatterplot_3PC_2d.png">
+    <img width="70%" src="https://github.com/FabG/dimred/raw/master/images/dimred_iris_scatterplot_3PC_2d.png">
     <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
 </p>
 
@@ -98,7 +101,7 @@ fig, ax = dimred.draw_scatterplot(X_transf, y=target,
 plt.show()
 ```
 <p align="center" width="100%">
-    <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/dimred_iris_scatterplot_3PC_3d.png">
+    <img width="70%" src="https://github.com/FabG/dimred/raw/master/images/dimred_iris_scatterplot_3PC_3d.png">
     <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
 </p>
 
@@ -334,7 +337,7 @@ PCA aims to find linearly uncorrelated orthogonal axes, which are also known as 
 Let’s intuitively understand PCA by fitting it on a 3-D data matrix, which can be conveniently represented by a 3-D scatter plot:
 
 <p align="center" width="100%">
-    <img width="70%" src="https://github.com/FabG/dimred/blob/master/images/pca_3d_2d.png">
+    <img width="70%" src="https://github.com/FabG/dimred/raw/master/images/pca_3d_2d.png">
     <br><i>3D to 2D dimension reduction with PCA <a href="https://medium.com/@TheDataGyan/dimensionality-reduction-with-pca-and-t-sne-in-r-2715683819"> (source)</a></i>
 </p>
 
@@ -348,12 +351,12 @@ The PCs can be determined via eigen decomposition of the covariance matrix C. Af
 Image for post
 Eigendecomposition of the covariance matrix C:  
 <p align="center" width="100%">
-    <img width="40%" src="https://github.com/FabG/dimred/blob/master/images/eidgen_decomposition_covariance.png">
+    <img width="40%" src="https://github.com/FabG/dimred/raw/master/images/eidgen_decomposition_covariance.png">
 </p>
 
 In the equation above, the covariance matrix C(m×m) is decomposed to a matrix of eigenvectors W(m×m) and a diagonal matrix of m eigenvalues Λ. The eigenvectors, which are the column vectors in W, are in fact the PCs we are seeking. We can then use matrix multiplication to project the data onto the PC space. For the purpose of dimensionality reduction, we can project the data points onto the first k PCs as the representation of the data:  
 <p align="center" width="100%">
-    <img width="30%" src="https://github.com/FabG/dimred/blob/master/images/projected_data.png">
+    <img width="30%" src="https://github.com/FabG/dimred/raw/master/images/projected_data.png">
 </p>
 
 Notes: PCA is an analysis approach. You can do PCA using SVD, or you can do PCA doing the eigen-decomposition, or you can do PCA using many other methods.  In fact, most implementations of PCA actually use performs SVD under the hood rather than doing eigen decomposition on the covariance matrix because SVD can be much more efficient and is able to handle sparse matrices. In addition, there are reduced forms of SVD which are even more economic to compute.
@@ -414,7 +417,7 @@ SVD is another decomposition method for both real and complex matrices. It decom
 
 Here is a friendler  way to visualize the **SVD** formula:
 <p align="center" width="100%">
-    <img width="40%" src="https://github.com/FabG/dimred/blob/master/images/svd_matrix.png">
+    <img width="40%" src="https://github.com/FabG/dimred/raw/master/images/svd_matrix.png">
     <br><i>Illustration of SVD<a href="https://towardsdatascience.com/pca-and-svd-explained-with-numpy-5d13b0d2a4d8"> (source)</a></i>
 </p>
 
@@ -445,12 +448,12 @@ def svd(X):
 ##### Relationship between PCA and SVD
 PCA and SVD are closely related approaches and can be both applied to decompose any rectangular matrices. We can look into their relationship by performing SVD on the covariance matrix C:
 <p align="center" width="100%">
-    <img width="40%" src="https://github.com/FabG/dimred/blob/master/images/covariance_matrix_pca_svd.png">
+    <img width="40%" src="https://github.com/FabG/dimred/raw/master/images/covariance_matrix_pca_svd.png">
 </p>
 
 From the above derivation, we notice that the result is in the same form with eigen decomposition of C, we can easily see the relationship between singular values (Σ) and eigenvalues (Λ):
 <p align="center" width="100%">
-    <img width="40%" src="https://github.com/FabG/dimred/blob/master/images/eigen_singular_values_relationship.png">
+    <img width="40%" src="https://github.com/FabG/dimred/raw/master/images/eigen_singular_values_relationship.png">
 </p>
 
 
