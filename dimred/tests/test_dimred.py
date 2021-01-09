@@ -379,7 +379,8 @@ def test_dimred_evd():
     assert(np.allclose(X_vecs_pca_1, X_vecs_pca_ref1))  # avoiding rounding float errors
     assert(np.allclose(X_vecs_pca_2, X_vecs_pca_ref2))  # avoiding rounding float errors
     assert(np.allclose(X_vecs_pca_3, X_vecs_pca_ref3))  # avoiding rounding float errors
-    assert(np.allclose(X_transf, X_vecs_pca_ref1))  # avoiding rounding float errors
+
+    assert(np.allclose(X_transf, X_vecs_pca_ref2))  # avoiding rounding float errors
     assert(np.allclose(X_transf1, X_vecs_pca_ref1))  # avoiding rounding float errors
     assert(np.allclose(X_transf2, X_vecs_pca_ref2))  # avoiding rounding float errors
     assert(np.allclose(X_transf3, X_vecs_pca_ref3))  # avoiding rounding float errors
@@ -501,9 +502,9 @@ def test_draw_scatterplot_2dim_iris_reduced_data():
     fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2,
                 title='Reduced Iris Dataset with DimRed SVD (2 Components)',
                 legend=True)
-    #plt.ion()
-    plt.show()
-    #plt.pause(0.002)
+    plt.show(block=False)
+    plt.pause(1.5)
+    plt.close()
 
 
 def test_draw_scatterplot_3dim_iris_reduced_data():
@@ -520,7 +521,9 @@ def test_draw_scatterplot_3dim_iris_reduced_data():
     fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3,
             title='Reduced Iris Dataset with DimRed SVD (3 Components)',
             legend=True)
-    plt.show()
+    plt.show(block=False)
+    plt.pause(1.5)
+    plt.close()
 
 def test_draw_scatterplot_3dim_iris_reduced_data_3d():
     iris = load_iris()
@@ -537,7 +540,9 @@ def test_draw_scatterplot_3dim_iris_reduced_data_3d():
             title='Reduced Iris Dataset with DimRed SVD (3 Components) in 3D',
             legend=False,
             dim3=True)
-    plt.show()
+    plt.show(block=False)
+    plt.pause(1.5)
+    plt.close()
 
 def test_draw_scatterplot_2dim_iris_reduced_data_evd():
     iris = load_iris()
@@ -549,7 +554,9 @@ def test_draw_scatterplot_2dim_iris_reduced_data_evd():
     fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2,
             title='Reduced Iris Dataset with DimRed EVD (2 Components)',
             legend=True)
-    plt.show()
+    plt.show(block=False)
+    plt.pause(1.5)
+    plt.close()
 
 def test_draw_scatterplot_3dim_iris_reduced_data_evd():
     iris = load_iris()
@@ -565,4 +572,6 @@ def test_draw_scatterplot_3dim_iris_reduced_data_evd():
     fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3,
             title='Reduced Iris Dataset with DimRed EVD (3 Components)',
             legend=True)
-    plt.show()
+    plt.show(block=False)
+    plt.pause(1.5)
+    plt.close()

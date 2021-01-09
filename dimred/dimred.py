@@ -352,8 +352,8 @@ class DimRed():
 
         # EVD
         eigen_vals_sorted, eigen_vecs_sorted = DimRed._eigen_sorted(X_cov)
-        logger.info('eigen_vals_sorted: {}'.format(eigen_vals_sorted))
-        logger.info('eigen_vecs_sorted: {}'.format(eigen_vecs_sorted))
+        logger.info('eigen_vals_sorted: \n{}'.format(eigen_vals_sorted))
+        logger.info('eigen_vecs_sorted: \n{}'.format(eigen_vecs_sorted))
 
         # Postprocess the number of components required
         X_transf = self._postprocess_dimred_pca_evd(X_centered, eigen_vals_sorted, eigen_vecs_sorted)
@@ -482,6 +482,8 @@ class DimRed():
             Equal to the average of (min(n_features, n_samples) - n_components)
             smallest eigenvalues of the covariance matrix of X.
         """
+        self.n_features_ = pca.n_features_
+        self.n_samples_ = pca.n_samples_
         self.explained_variance_ = pca.explained_variance_
         self.explained_variance_ratio_ = pca.explained_variance_ratio_
         self.singular_values_ = pca.singular_values_
@@ -489,8 +491,6 @@ class DimRed():
         self.components_ = pca.components_
         self.n_components_ = pca.n_components_
         self.noise_variance_ = pca.noise_variance_
-        self.n_features_ = pca.n_features_
-        self.n_samples_ = pca.n_samples_
 
         return X
 
@@ -598,11 +598,10 @@ class DimRed():
         # Calculating the explained variance on each of components
         explained_variance_ = np.empty([n_features], dtype=float)
         for i in eigen_vals_sorted:
-
              np.append(explained_variance_, (i/sum(eigen_vals_sorted))*100)
 
         # Identifying components that explain at least 95%
-        total_var = np.cumsum(explained_variance_)
+        total_var = explained_variance_.sum()
         explained_variance_ratio_ = explained_variance_ / total_var
 
         n_components = self.n_components
@@ -617,6 +616,12 @@ class DimRed():
         self.explained_variance_ = explained_variance_
         self.explained_variance_ratio_ = explained_variance_ratio_[:n_components]
         self.noise_variance_ = explained_variance_[n_components:].mean()
+
+        logger.info('components_: \n{}'.format(self.components_))
+        logger.info('n_components_: {}'.format(self.n_components_))
+        logger.info('explained_variance_: \n{}'.format(self.explained_variance_))
+        logger.info('explained_variance_ratio_: \n{}'.format(self.explained_variance_ratio_))
+        logger.info('noise_variance_: {}'.format(self.noise_variance_))
 
         # Project the data
         X_transf = np.empty([n_samples, self.n_components_])
