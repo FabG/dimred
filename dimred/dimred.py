@@ -100,10 +100,63 @@ class DimRed():
         return (model)
 
 
+    def draw_varianceplot(self, n_components=None, figsize=DEFAULT_FIG_SIZE):
+        """
+        Render the cumulative variance based in components
+
+        Parameters
+        ----------
+        n_components : int, default : None (display all components)
+            number of components to plot if you want to limit it
+        figsize : 2-tuple of floats (float, float), optional, default: (10,8)
+            Figure dimension (width, height) in inches.
+
+        Returns
+        -------
+        tuple containing (fig, ax)
+
+        """
+        if n_components is not None:
+            explained_variance = self.explained_variance_[:n_components]
+            explained_variance_ratio = self.explained_variance_ratio_[:n_components]
+        else:
+            explained_variance = self.explained_variance_
+            explained_variance_ratio = self.explained_variance_ratio_
+
+        if 0 < self.n_components < 1:
+            total_explained_variance = self.n_components
+        else:
+            total_explained_variance = np.sum(explained_variance_ratio)
+
+        cumsum_explained_variance = stable_cumsum(self.explained_variance_ratio_)
+        # index based on components to plot
+        x_index = np.arange(1, len(explained_variance) + 1)
+
+        fig, ax = plt.subplots(figsize=figsize, edgecolor='b')
+        plt.plot(x_index, cumsum_explained_variance, 'o--', color='b', linewidth=1, label='Cumulative explained variance')
+
+        plt.xlabel('Principal Component')
+        plt.ylabel('Explained Variance %')
+        plt.grid(True)
+
+        # setting x ticks to match components
+        x_index = np.arange(1, len(explained_variance) + 1)
+        ax.set_xticks(x_index)
+
+        ax.axvline(self.n_components_, linewidth=0.8, color='m')
+        ax.axhline(y=total_explained_variance, xmin=0, xmax=1, linewidth=0.8, color='m')
+        plt.bar(x_index, explained_variance_ratio, color='#3182bd', alpha=0.8, label='Explained Variance')
+
+        title = 'Cumulative Explained Variance\n (' + str(self.n_components) + ' Principal Components explain [' + str(total_explained_variance * 100)[0:5] + '%] of the variance)'
+        plt.title(title)
+
+        return fig, ax
+
+
     def draw_scatterplot(self, X, y=None, PC=2, title=DEFAULT_TITLE,
                         figsize=DEFAULT_FIG_SIZE, legend=False, dim3=False) :
         """
-        Render X as a scatter 2d plot with 2 or 3 components
+        Render X as a scatter 2d or 3d plot with 2 or 3 components
 
 
         Parameters

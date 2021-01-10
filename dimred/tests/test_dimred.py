@@ -491,6 +491,25 @@ def test_truncated_svd():
     assert(X_transformed2.shape == (100, 5))
 
 
+def test_draw_scatterplot_iris_reduced_data():
+    iris = load_iris()
+    X = iris.data
+    y = iris.target
+
+    dimred = DimRed()
+    X_transf = dimred.fit_transform(X)
+
+    fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2,
+                title='Reduced Iris Dataset with DimRed (2 Components)',
+                legend=True)
+
+    plt.show(block=False)
+    plt.pause(1.5)
+    fig2, ax2 = dimred.draw_varianceplot()
+    plt.show(block=False)
+    plt.pause(1.5)
+    plt.close()
+
 def test_draw_scatterplot_2dim_iris_reduced_data():
     iris = load_iris()
     X = iris.data
@@ -502,6 +521,10 @@ def test_draw_scatterplot_2dim_iris_reduced_data():
     fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=2,
                 title='Reduced Iris Dataset with DimRed SVD (2 Components)',
                 legend=True)
+
+    plt.show(block=False)
+    plt.pause(1.5)
+    fig2, ax2 = dimred.draw_varianceplot()
     plt.show(block=False)
     plt.pause(1.5)
     plt.close()
@@ -521,6 +544,7 @@ def test_draw_scatterplot_3dim_iris_reduced_data():
     fig, ax = dimred.draw_scatterplot(X_transf, y=y, PC=3,
             title='Reduced Iris Dataset with DimRed SVD (3 Components)',
             legend=True)
+
     plt.show(block=False)
     plt.pause(1.5)
     plt.close()
