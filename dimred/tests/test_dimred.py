@@ -214,7 +214,7 @@ def test_iris_data_dimred_svd_equal_sklearn_pca_1_comp():
     assert(np.allclose(singular_values_, singular_values_sk_))
     assert(np.allclose(n_components_, n_components_sk_))
 
-def test_mnist_data_dimred_svd():
+def test_mnist_data_dimred_svd_90():
     # loading modified mnist dataset
     # It contains 2000 labeled images of each digit 0 and 1. Images are 28x28 pixels
     # Classes: 2 (digits 0 and 1)
@@ -243,6 +243,36 @@ def test_mnist_data_dimred_svd():
     assert(mnist_dimensions_after_pca == 48)
     assert(components == 48)
 
+    fig, ax = dimred.draw_varianceplot()
+    plt.show(block=False)
+    plt.pause(1.5)
+    plt.close()
+
+def test_mnist_data_dimred_svd_60():
+    mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)
+
+    pixel_colnames = mnist_df.columns[:-1]
+    X = mnist_df[pixel_colnames]
+    y = mnist_df['label']
+
+    scaler = StandardScaler()
+    scaler.fit(X)
+
+    dimred = DimRed(algo='dimred_svd', n_components = .60)
+    X_pca = dimred.fit_transform(X)
+
+    mnist_dimensions_before_pca = X.shape[1]
+    mnist_dimensions_after_pca = X_pca.shape[1]
+    components = dimred.n_components_
+    assert(mnist_dimensions_before_pca == 784)
+    assert(mnist_dimensions_after_pca == 6)
+    assert(components == 6)
+
+    fig, ax = dimred.draw_varianceplot('MNIST Data')
+    plt.show(block=False)
+    plt.pause(1.5)
+
+    plt.close()
 
 def test_mnist_data_dimredsvd():
     mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)

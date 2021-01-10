@@ -100,59 +100,6 @@ class DimRed():
         return (model)
 
 
-    def draw_varianceplot(self, n_components=None, figsize=DEFAULT_FIG_SIZE):
-        """
-        Render the cumulative variance based in components
-
-        Parameters
-        ----------
-        n_components : int, default : None (display all components)
-            number of components to plot if you want to limit it
-        figsize : 2-tuple of floats (float, float), optional, default: (10,8)
-            Figure dimension (width, height) in inches.
-
-        Returns
-        -------
-        tuple containing (fig, ax)
-
-        """
-        if n_components is not None:
-            explained_variance = self.explained_variance_[:n_components]
-            explained_variance_ratio = self.explained_variance_ratio_[:n_components]
-        else:
-            explained_variance = self.explained_variance_
-            explained_variance_ratio = self.explained_variance_ratio_
-
-        if 0 < self.n_components < 1:
-            total_explained_variance = self.n_components
-        else:
-            total_explained_variance = np.sum(explained_variance_ratio)
-
-        cumsum_explained_variance = stable_cumsum(self.explained_variance_ratio_)
-        # index based on components to plot
-        x_index = np.arange(1, len(explained_variance) + 1)
-
-        fig, ax = plt.subplots(figsize=figsize, edgecolor='b')
-        plt.plot(x_index, cumsum_explained_variance, 'o--', color='b', linewidth=1, label='Cumulative explained variance')
-
-        plt.xlabel('Principal Component')
-        plt.ylabel('Explained Variance %')
-        plt.grid(True)
-
-        # setting x ticks to match components
-        x_index = np.arange(1, len(explained_variance) + 1)
-        ax.set_xticks(x_index)
-
-        ax.axvline(self.n_components_, linewidth=0.8, color='m')
-        ax.axhline(y=total_explained_variance, xmin=0, xmax=1, linewidth=0.8, color='m')
-        plt.bar(x_index, explained_variance_ratio, color='#3182bd', alpha=0.8, label='Explained Variance')
-
-        title = 'Cumulative Explained Variance\n (' + str(self.n_components) + ' Principal Components explain [' + str(total_explained_variance * 100)[0:5] + '%] of the variance)'
-        plt.title(title)
-
-        return fig, ax
-
-
     def draw_scatterplot(self, X, y=None, PC=2, title=DEFAULT_TITLE,
                         figsize=DEFAULT_FIG_SIZE, legend=False, dim3=False) :
         """
@@ -238,6 +185,69 @@ class DimRed():
                     legend2 = ax.legend(handles, labels, loc="upper right", title="Sizes")
 
         return fig, ax
+
+
+
+    def draw_varianceplot(self, title=None, figsize=DEFAULT_FIG_SIZE):
+        """
+        Render the cumulative variance based of components that match the target variance
+
+        Parameters
+        ----------
+        title : string, default : 'Cumulative Explained Variance'
+            Adds a title to the chart. Pass empty '' if you prefer no title
+        figsize : 2-tuple of floats (float, float), optional, default: (10,8)
+            Figure dimension (width, height) in inches.
+
+        Returns
+        -------
+        tuple containing (fig, ax)
+
+        """
+
+        explained_variance = self.explained_variance_
+        explained_variance_ratio = self.explained_variance_ratio_
+
+        if 0 < self.n_components < 1:
+            total_explained_variance = self.n_components
+        else:
+            total_explained_variance = np.sum(explained_variance_ratio)
+
+        cumsum_explained_variance = stable_cumsum(self.explained_variance_ratio_)
+
+        # index based on components to plot
+        x_index = np.arange(1, len(explained_variance) + 1)
+
+        # Cumulative Variance by component bar chart
+        fig, ax = plt.subplots(figsize=figsize, edgecolor='k')
+        plt.plot(x_index, cumsum_explained_variance, marker='*', color='royalblue', alpha=0.9, linewidth=1, label='Cumulative explained variance')
+
+        plt.xlabel('Principal Components')
+        plt.ylabel('Explained Variance %')
+        plt.grid(True)
+
+        # setting x ticks to match components
+        x_index = np.arange(1, len(explained_variance) + 1)
+        ax.set_xticks(x_index)
+        # if too many ticklabels, display odd numbers
+        if len(explained_variance) > 30:
+            for (i, label) in enumerate(ax.xaxis.get_ticklabels()):
+                if i % 2 != 0:
+                    label.set_visible(False)
+        # set our target as X and Y lines
+        ax.axvline(self.n_components_, linewidth=1.1, linestyle='--', color='mediumblue')
+        ax.axhline(y=total_explained_variance, xmin=0, xmax=1, linewidth=1.1,  linestyle='--', color='mediumblue')
+
+        # Variance by component bar chart
+        plt.bar(x_index, explained_variance_ratio, color='mediumseagreen', edgecolor='dimgray', alpha=0.8, label='Explained Variance')
+
+        full_title = ''
+        if title is not None: full_title = title + '\n'
+        full_title += 'Cumulative Explained Variance\n (' + str(self.n_components_) + ' Principal Components explain [' + str(total_explained_variance * 100)[0:5] + '%] of the variance)'
+        plt.title(full_title)
+
+        return fig, ax
+
 
 
     def _get_variance_axis(self):
