@@ -44,7 +44,7 @@ target = iris.target
 ```
 
 
-Dimension Reduction of 2 and plot:
+Dimension Reduction Example - 2D plot / 2 Components:
 ```python
 # Reduce it to 2 principal components
 dimred = DimRed(algo='dimred_svd', n_components=2)
@@ -63,7 +63,7 @@ plt.show()
     <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
 </p>
 
-Dimension Reduction of 2 and 2D plot (using the 3rd component as bubble size):
+Dimension Reduction Example - 2D plot / 3 Components (using the 3rd component as bubble size):
 ```python
 # Reduce it to 3 principal components
 dimred = DimRed(algo='dimred_svd', n_components=3)
@@ -79,11 +79,32 @@ plt.show()
 ```
 <p align="center" width="100%">
     <img width="70%" src="https://github.com/FabG/dimred/raw/master/images/dimred_iris_scatterplot_3PC_2d.png">
-    <br><i> Scatter Plot pf Iris Dataset reduced to 2 components with DimRed</a></i>
+    <br><i> Scatter Plot of Iris Dataset reduced to 2 components with DimRed</a></i>
+</p>
+
+Dimension Reduction Example - Cumulative Variance:
+
+Below we will reduce the `MNIST` dataset to retain 60% of the variance from the original 64 dimensions (8 x 8 pixels)
+
+```python
+digits = load_digits(as_frame=True)
+  X = digits.data
+  scaler = StandardScaler()
+  scaler.fit(X)
+
+  dimred = DimRed(algo='dimred_svd', n_components = .60)
+  X_pca = dimred.fit_transform(X)
+
+  fig, ax = dimred.draw_varianceplot('MNIST Data')
+  plt.show()
+```
+<p align="center" width="100%">
+    <img width="70%" src="https://github.com/FabG/dimred/raw/master/images/dimred_mnist_cumvarianceplot_60.png">
+    <br><i> Cumulative Variance Plot of MNIST Dataset based on 60% Variance retained with DimRed</a></i>
 </p>
 
 
-Dimension Reduction of 2 and 3D plot:
+Dimension Reduction Example - 3D plot:
 
 ```python
 # Reduce it to 3 principal components
@@ -188,10 +209,10 @@ To run a particular test, run:
 > pytest --capture=tee-sys --cov=dimred tests/ -k '<your test>'
 ```
 
-We should aim at having a **minimum of 80% code coverage**, and preferably closer or equal to 100%.
+We should aim at having a **minimum of 90% code coverage**, and preferably closer or equal to 100%.
 
 
-#### 2.3 PAckaging and uploading to PiPy
+#### 2.3 Packaging and uploading to PiPy
 See [dimred-packaging](dimred-packaging.md)
 
 

@@ -6,19 +6,13 @@ import matplotlib.pyplot as plt
 from dimred import DimRed
 from scipy.sparse import random as sparse_random
 from scipy.sparse import csr_matrix, isspmatrix
-from sklearn.datasets import load_iris, make_friedman1, make_sparse_spd_matrix
+from sklearn.datasets import load_iris, load_digits, make_friedman1, make_sparse_spd_matrix
 from sklearn.decomposition import TruncatedSVD, SparsePCA
 from sklearn.utils.extmath import svd_flip, stable_cumsum
 from sklearn.preprocessing import StandardScaler
 
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
-
-# Set up absolute path to unit test files
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-#MY_DATA_PATH = os.path.join(THIS_DIR, os.pardir, 'data/data.csv')
-MY_DATA_PATH_MNIST = os.path.join(THIS_DIR, 'data/mnist_only_0_1.csv')
-MY_DATA_PATH_IRIS = os.path.join(THIS_DIR, 'data/iris_data.csv')
 
 def test_init():
     dimred = DimRed()
@@ -215,45 +209,49 @@ def test_iris_data_dimred_svd_equal_sklearn_pca_1_comp():
     assert(np.allclose(n_components_, n_components_sk_))
 
 def test_mnist_data_dimred_svd_90():
-    # loading modified mnist dataset
-    # It contains 2000 labeled images of each digit 0 and 1. Images are 28x28 pixels
-    # Classes: 2 (digits 0 and 1)
-    # Samples per class: 2000 samples per class
-    # Samples total: 4000
-    # Dimensionality: 784 (28 x 28 pixels images)
-    # Features: integers calues from 0 to 255 (Pixel Grey color)
-    mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)
+    # Load and return the digits dataset (classification).
+    # Each datapoint is a 8x8 image of a digit.
+    # Dimensionality = 64
+    # Features = integers 0-16
+    # Observations = 1797
+    digits = load_digits(as_frame=True)
+    X = digits.data
+    y = digits.target
+    pixel_colnames = digits.feature_names
 
-    pixel_colnames = mnist_df.columns[:-1]
-    X = mnist_df[pixel_colnames]
-    y = mnist_df['label']
+    n_samples, n_features = X.shape
 
-    # PCA is sensitive to the scale of the features.
-    # We can standardize your data onto unit scale (mean = 0 and variance = 1) by using Scikit-Learn's StandardScaler.
     scaler = StandardScaler()
     scaler.fit(X)
 
-    dimred = DimRed(algo='dimred_svd', n_components = .90) # n_components = .90 means that scikit-learn will choose the minimum number of principal components such that 90% of the variance is retained.
+    dimred = DimRed(algo='dimred_svd', n_components = .90)
     X_pca = dimred.fit_transform(X)
 
     mnist_dimensions_before_pca = X.shape[1]
     mnist_dimensions_after_pca = X_pca.shape[1]
     components = dimred.n_components_
-    assert(mnist_dimensions_before_pca == 784)
-    assert(mnist_dimensions_after_pca == 48)
-    assert(components == 48)
+    assert(mnist_dimensions_before_pca == 64)
+    assert(mnist_dimensions_after_pca == 21)
+    assert(components == 21)
 
-    fig, ax = dimred.draw_varianceplot()
+    fig, ax = dimred.draw_varianceplot('MNIST Data')
     plt.show(block=False)
     plt.pause(1.5)
     plt.close()
 
-def test_mnist_data_dimred_svd_60():
-    mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)
 
-    pixel_colnames = mnist_df.columns[:-1]
-    X = mnist_df[pixel_colnames]
-    y = mnist_df['label']
+def test_mnist_data_dimred_svd_60():
+    # Load and return the digits dataset (classification).
+    # Each datapoint is a 8x8 image of a digit.
+    # Dimensionality = 64
+    # Features = integers 0-16
+    # Observations = 1797
+    digits = load_digits(as_frame=True)
+    X = digits.data
+    y = digits.target
+    pixel_colnames = digits.feature_names
+
+    n_samples, n_features = X.shape
 
     scaler = StandardScaler()
     scaler.fit(X)
@@ -264,35 +262,14 @@ def test_mnist_data_dimred_svd_60():
     mnist_dimensions_before_pca = X.shape[1]
     mnist_dimensions_after_pca = X_pca.shape[1]
     components = dimred.n_components_
-    assert(mnist_dimensions_before_pca == 784)
-    assert(mnist_dimensions_after_pca == 6)
-    assert(components == 6)
+    assert(mnist_dimensions_before_pca == 64)
+    assert(mnist_dimensions_after_pca == 7)
+    assert(components == 7)
 
     fig, ax = dimred.draw_varianceplot('MNIST Data')
     plt.show(block=False)
     plt.pause(1.5)
-
     plt.close()
-
-def test_mnist_data_dimredsvd():
-    mnist_df = pd.read_csv(MY_DATA_PATH_MNIST)
-
-    pixel_colnames = mnist_df.columns[:-1]
-    X = mnist_df[pixel_colnames]
-    y = mnist_df['label']
-
-    # PCA is sensitive to the scale of the features.
-    # We can standardize your data onto unit scale (mean = 0 and variance = 1) by using Scikit-Learn's StandardScaler.
-    scaler = StandardScaler()
-    scaler.fit(X)
-
-    dimred = DimRed(n_components = .90, algo='dimred_svd') # n_components = .90 means that scikit-learn will choose the minimum number of principal components such that 90% of the variance is retained.
-    dimred.fit_transform(X)
-
-    mnist_dimensions_before_pca = len(pixel_colnames)
-    mnist_dimensions_after_pca = dimred.n_components_
-    assert(mnist_dimensions_before_pca == 784)
-    assert(mnist_dimensions_after_pca == 48)
 
 
 def test_center():
