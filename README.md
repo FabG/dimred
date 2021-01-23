@@ -3,7 +3,7 @@
 
 ### DimRed Introduction
 <img align="right" src="https://github.com/FabG/dimred/raw/master/images/Dimred_s3.png" style="vertical-align:left;margin:0px 10px">
-<!--img align="left" src="https://github.com/FabG/dimred/raw/master/images/DimRed_Logo_s.jpg" width="170" height="100" style="vertical-align:left;margin:0px 10px"-->
+
 
 **DimRed** is a python package that enables **Dimension Reduction** leveraging various algorithms with the default being
   **PCA** (Principal Component Analysis). The algorithms supported so far are:
@@ -136,42 +136,34 @@ plt.show()
 * [Resources](#resources)
 
 
-### <a name="refresher-dimred"></a> 1. Refresher on Dimension Reduction
-**Dimension reduction** (or Dimensionality reduction) refers to techniques for reducing the number of input variables in training data.
 
-*When dealing with high dimensional data, it is often useful to reduce the dimensionality by projecting the data to a lower dimensional subspace which captures the “essence” of the data. This is called **dimensionality reduction**.*
+### <a name="dimred-installation"></a> 1. DimRed Installation
 
-— Page 11, [Machine Learning: A Probabilistic Perspective](https://www.amazon.com/Machine-Learning-Probabilistic-Perspective-Computation/dp/0262018020/ref=as_li_ss_tl?keywords=Machine+Learning:+A+Probabilistic+Perspective&qid=1580679017&sr=8-1&linkCode=sl1&tag=inspiredalgor-20&linkId=e1ce409a189df7eeb214b15424a7379c&language=en_US), 2012.
+`DimRed` is built as a python package.
+You can install it from [Pypi](https://pypi.org) as a pip installable package.
+Or you can also download the code and do a local install.
 
-
-High-dimensionality might mean hundreds, thousands, or even millions of input variables.
-
-Fewer input dimensions often means correspondingly fewer parameters or a simpler structure in the machine learning model, referred to as degrees of freedom. A model with too many degrees of freedom is likely to **overfit** the training dataset and may not perform well on new data.
-
-It is **desirable to have simple models that generalize well**, and in turn, input data with few input variables. This is particularly true for linear models where the number of inputs and the degrees of freedom of the model are often closely related.
-
-
-
-#### Why is Dimension Reduction useful?
-- **Reduces training time** — due to smaller dataset
-- **Removes noise** — by keeping only what’s relevant
-- **Makes visualization possible** — in cases where you have a maximum of 3 principal components
-
-
-
-
-### <a name="dimred-installation"></a> 2. DimRed Installation
-
-`DimRed` is currently built as a python package.
-It will be soon hosted in artifactory to be pip installable as well as in MLaaS to be available as a service.
-
-For now, you can use it by cloning this repo and from the home directory, follow the below steps.
-
-#### 2.1 Install
+#### 1.1 Pip Install
 You need to run Python 3.X.
 And you should set up a virtual environment with `conda` or `virtualenv`
 
 Run:
+```bash
+pip install -i https://pypi.org/simple/ dimred
+```
+
+
+#### 1.2 Local Install
+You need to run Python 3.X.
+And you should set up a virtual environment with `conda` or `virtualenv`
+
+Go to: [dimred pypi](https://pypi.org/project/dimred/)
+
+Click on [Download files](https://pypi.org/project/dimred/#files) link
+
+And download either the Wheel or the Source code.
+
+To locally install from Source code, run:
 ```bash
 > pip install -r requirements
 ```
@@ -182,7 +174,7 @@ Finally, don't forget to set you `$PYTHONPATH` variable to the root of your proj
 ```
 It should map to: `/your/path/dimred/dimred`
 
-#### 2.2 Tests
+##### Tests
 For Unit Tests, run:  
 ```bash
 > pytest
@@ -212,13 +204,13 @@ To run a particular test, run:
 We should aim at having a **minimum of 90% code coverage**, and preferably closer or equal to 100%.
 
 
-#### 2.3 Packaging and uploading to PiPy
+##### Packaging and uploading to PiPy
 See [dimred-packaging](dimred-packaging.md)
 
 
-### <a name="dimred-examples"></a> 3. DimRed Examples
+### <a name="dimred-examples"></a> 2. DimRed Examples
 
-#### 3.1 DimRed on Iris dataset (automatic selection)
+#### 2.1 DimRed on Iris dataset (automatic selection)
 Reducing the (150x4) iris matrix to (150x2) with `DimRed` letting the algorithm pick the right algorithm (in that case `sklearn_pca` which is the default algorithm):
 
 ```python
@@ -262,7 +254,7 @@ dimred.explained_variance_ratio_
 
 ```
 
-#### 3.2a DimRed on Friedman Sparse dataset (automatic selection)
+#### 2.2a DimRed on Friedman Sparse dataset (automatic selection)
 Reducing the (30x30) sparse matrix to (30x5) with `DimRed` letting the algorithm pick the right algorithm (in that case `sklearn_sparse_pca` which is using sklearn `SparsePCA()`).
 
 ```python
@@ -287,7 +279,7 @@ X_pca.shape
 ```
 
 
-#### 3.2b DimRed on Friedman Sparse dataset (forced selection)
+#### 2.2b DimRed on Friedman Sparse dataset (forced selection)
 Reducing the (30x30) sparse matrix to (30x5) with `DimRed` specifying the (in that case `sklearn_pca` which is using Singular Value Decomposition).
 
 ```python
@@ -311,6 +303,29 @@ X_pca.shape
 > (30, 5))
 
 ```
+
+
+### <a name="refresher-dimred"></a> 3. Refresher on Dimension Reduction
+**Dimension reduction** (or Dimensionality reduction) refers to techniques for reducing the number of input variables in training data.
+
+*When dealing with high dimensional data, it is often useful to reduce the dimensionality by projecting the data to a lower dimensional subspace which captures the “essence” of the data. This is called **dimensionality reduction**.*
+
+— Page 11, [Machine Learning: A Probabilistic Perspective](https://www.amazon.com/Machine-Learning-Probabilistic-Perspective-Computation/dp/0262018020/ref=as_li_ss_tl?keywords=Machine+Learning:+A+Probabilistic+Perspective&qid=1580679017&sr=8-1&linkCode=sl1&tag=inspiredalgor-20&linkId=e1ce409a189df7eeb214b15424a7379c&language=en_US), 2012.
+
+
+High-dimensionality might mean hundreds, thousands, or even millions of input variables.
+
+Fewer input dimensions often means correspondingly fewer parameters or a simpler structure in the machine learning model, referred to as degrees of freedom. A model with too many degrees of freedom is likely to **overfit** the training dataset and may not perform well on new data.
+
+It is **desirable to have simple models that generalize well**, and in turn, input data with few input variables. This is particularly true for linear models where the number of inputs and the degrees of freedom of the model are often closely related.
+
+
+
+#### Why is Dimension Reduction useful?
+- **Reduces training time** — due to smaller dataset
+- **Removes noise** — by keeping only what’s relevant
+- **Makes visualization possible** — in cases where you have a maximum of 3 principal components
+
 
 
 ### <a name="dimred-notebooks"></a> 4. Dimension Reduction Notebooks
@@ -552,11 +567,3 @@ using the SVD to perform PCA makes much better sense numerically than forming th
  - [Dimensionality Reduction with PCA and t-SNE in R](https://medium.com/@TheDataGyan/dimensionality-reduction-with-pca-and-t-sne-in-r-2715683819)
  - [What are Eigenvalues and eigenvectors](https://medium.com/fintechexplained/what-are-eigenvalues-and-eigenvectors-a-must-know-concept-for-machine-learning-80d0fd330e47)
  - [PCA with numpy](https://towardsdatascience.com/pca-with-numpy-58917c1d0391)
-
-
-#### DataSets (for Unit Tests)
-We are using various datasets:
- - some created statically in the unit test functions
- - some loaded from scikitlearn: `from sklearn import datasets
-`- some available as flat files under: `/tests/data`
-  - [mnist handwritten digits dataset for Unit Test](http://yann.lecun.com/exdb/mnist/)

@@ -3,6 +3,11 @@ The below instructions are for maintaining, updating and uploading dimred as a p
 You can go back to the main [README](readme.md) for using dimred package
 
 #### 1. Automatic packaging and uploading to PiPy
+Increment the version of the package in [setup.py](setup.py) following the `M.m.p` convention (M=Major, m=minor, p=patch).
+
+Example:
+`VERSION = '0.0.1'`
+
 A Shell scripts was built to automate the build+upload to Pipy: `build_deploy_pipy.sh`
 To package `dimred` and test it first at `test.pipy.org/dimred`, run:
 ```bash
